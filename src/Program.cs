@@ -2,30 +2,36 @@
 using CommandLine;
 
 
-public class Program
-{
-    public static void Main(string[] args)
+namespace Ipk25Chat {
+    public class Program
     {
-        // Create a parser instance with default settings
-        var parser = new Parser(with =>
+        public static void Main(string[] args)
         {
-            with.CaseInsensitiveEnumValues = true; // Allow tcp/TCP, udp/UDP for -t (case-insensitive)
-            with.HelpWriter = Console.Error; // By default, writes help output to Console.Error
-        });
+            TcpChatClient tcpClient = null;
+            // Create a parser instance with default settings
+            var parser = new Parser(with =>
+            {
+                with.CaseInsensitiveEnumValues = true; // Allow tcp/TCP, udp/UDP for -t (case-insensitive)
+                with.HelpWriter = Console.Error; // By default, writes help output to Console.Error
+            });
 
-        // Parse command line arguments
-        var parserResult = parser.ParseArguments<CliOptions>(args);
+            // Parse command line arguments
+            var parserResult = parser.ParseArguments<CliOptions>(args);
 
-        // Handle the parsing result
-        parserResult.WithParsed<CliOptions>(options =>
-        {
-            // Parsing was successful, we have the 'options' object with values
-            
-        })
-        .WithNotParsed<CliOptions>((errors) =>
-        {
-            // Parsing failed or the user requested help (-h/--help)
-            Console.WriteLine("Argument parsing failed or help requested.");
-        });
+            // Handle the parsing result
+            parserResult.WithParsed<CliOptions>(options =>
+            {
+                // Parsing succeeded
+                tcpClient = new TcpChatClient(options.Server, options.Port);
+                
+            })
+            .WithNotParsed<CliOptions>((errors) =>
+            {
+                // Parsing failed or the user requested help (-h/--help)
+                Console.WriteLine("Argument parsing failed or help requested.");
+            });
+
+            Console.WriteLine(tcpClient.ToString());
+        }
     }
 }

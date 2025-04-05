@@ -22,7 +22,10 @@ namespace Ipk25Chat {
             parserResult.WithParsed<CliOptions>(options =>
             {
                 // Parsing succeeded
-                tcpClient = new TcpChatClient(options.Server, options.Port);
+                if(options.Transport == TransportProtocol.Tcp) {
+                    tcpClient = new TcpChatClient(options.Server, options.Port);
+                }
+                
                 
             })
             .WithNotParsed<CliOptions>((errors) =>
@@ -32,6 +35,13 @@ namespace Ipk25Chat {
             });
 
             Console.WriteLine(tcpClient.ToString());
+
+
+            if(tcpClient != null) {
+                tcpClient.Start();
+                Console.ReadKey();
+            }
+            
         }
     }
 }

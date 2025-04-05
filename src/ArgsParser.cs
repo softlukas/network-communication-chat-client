@@ -5,8 +5,8 @@ using System.Collections.Generic; // Required for WithNotParsed Error handling
 // Definition of enum for transport protocol
 public enum TransportProtocol
 {
-    tcp,
-    udp
+    Tcp,
+    Udp
 }
 
 // Class to hold the argument values

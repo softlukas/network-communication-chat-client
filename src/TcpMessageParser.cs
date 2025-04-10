@@ -67,6 +67,21 @@ public static class TcpMessageParser
                 }
             }
 
+            if(rawData.StartsWith("BYE FROM "))
+            {
+                ByeMessage byeMessage = new ByeMessage
+                (
+                    displayName: rawData.Substring(9).TrimEnd('\r','\n')
+                );
+                
+            
+                Console.WriteLine(byeMessage.ToString());
+
+                
+
+                return byeMessage;
+            }
+
             Console.Error.WriteLine($"WARN: TcpMessageParser could not parse: {rawData.TrimEnd()}");
             Environment.Exit(1);
             return null; // Return null if no known pattern matches

@@ -159,6 +159,13 @@ namespace Ipk25Chat
                             CurrentState = ClientState.Join;
                             break;
                         }
+                        if(message is ByeMessage) {
+                            ByeMessage byeMessage = (ByeMessage) message;
+                            payload = byeMessage.GetTcpPayload();
+                            SendPayloadAsync(payload);
+                            CurrentState = ClientState.End;
+                            break;
+                        }
                         
                         break;
                 }

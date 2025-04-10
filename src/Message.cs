@@ -27,6 +27,8 @@ namespace Ipk25Chat
             // Trim whitespace
             string trimmedInput = userInput.Trim();
 
+            Console.Error.WriteLine($"Debug: User input: {trimmedInput}");
+
             // Check for /auth command
             if (trimmedInput.StartsWith("/auth ", StringComparison.OrdinalIgnoreCase))
             {
@@ -44,7 +46,7 @@ namespace Ipk25Chat
                 );
             }
 
-            if (tcpChatClient.CurrentState == ClientState.Open)
+            if (tcpChatClient.CurrentState == ClientState.Open && trimmedInput != "/quit")
             {
                 Console.Error.WriteLine("Debug: Msg message object created");
                 
@@ -68,6 +70,13 @@ namespace Ipk25Chat
                     displayName: tcpChatClient.DisplayName
                 );
                 
+            }
+            if(trimmedInput == "/quit")
+            {
+                tcpChatClient.CurrentState = ClientState.End;
+                return new ByeMessage(
+                    displayName: tcpChatClient.DisplayName
+                );
             }
             return null;
         }

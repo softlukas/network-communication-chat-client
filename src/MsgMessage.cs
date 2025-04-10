@@ -1,5 +1,4 @@
-using System.Text; // Potrebné pre kódovanie správ do bajtov
-// Odporúčam umiestniť do samostatného súboru MsgMessage.cs
+using System.Text;
 namespace Ipk25Chat
 {
     // Represents a standard MSG chat message data container.
@@ -29,6 +28,12 @@ namespace Ipk25Chat
 
             // Return the byte array
             return dataBytes;
+        }
+
+        public override string ToString()
+        {
+            // Format the message as "MSG FROM {DisplayName} IS {MessageContent}"
+            return $"Server: {DisplayName} {MessageContent}\n";
         }
     }
 }

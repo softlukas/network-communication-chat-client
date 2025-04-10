@@ -1,24 +1,20 @@
-// In Message.cs
 using System;
 using System.Threading.Tasks;
 
 namespace Ipk25Chat
 {
-    // Message type enum (as defined before)
+    // Message type enum
     public enum MessageType { AUTH, REPLY, JOIN, MSG, ERR, BYE, CONFIRM, PING }
 
-    // Base abstract class for message data containers.
+    // Base abstract class for message
     public abstract class Message
     {
-        // Gets the specific logical type of this protocol message.
-        public abstract MessageType Type { get; }
+        public abstract MessageType Type { get; } 
+        
+        public abstract byte[] GetTcpPayload();
 
-        // Async static factory method to read user input and parse message commands.
-        // Returns a specific Message object (e.g., AuthMessage) if input is a valid command,
-        // otherwise returns null (for non-message commands, plain text, errors, or EOF)
-        public static async Task<Message?> CreateMessageFromUserInputAsync()
+        public static async Task<Message?> CreateMessageFromUserInputAsync(TcpChatClient tcpChatClient)
         {
-            Console.Write("Enter command/message: "); // Prompt user (optional)
             // Read line async (non-blocking)
             string? userInput = await Task.Run(() => Console.ReadLine());
 
@@ -36,17 +32,44 @@ namespace Ipk25Chat
             {
                 // Extract arguments string
                 string argsString = trimmedInput.Substring("/auth ".Length);
-                // Call static parser on AuthMessage class
-                return AuthMessage.TryParseArguments(argsString);
-            }
-            
-            
 
-            
+                // Call static parser on AuthMessage class
+                string[] parsedArgs = AuthMessage.ParseAuthMessageArgs(argsString, tcpChatClient);
+
+                return new AuthMessage
+                (
+                    username: parsedArgs[0],
+                    secret: parsedArgs[1],
+                    displayName: parsedArgs[2]
+                );
+            }
+
+            if (tcpChatClient.CurrentState == ClientState.Open)
+            {
+                Console.Error.WriteLine("Debug: Msg message object created");
+                
+                return new MsgMessage
+                (
+                    displayName: tcpChatClient.DisplayName, 
+                    messageContent: trimmedInput
+                );
+                
+            }
+            if (trimmedInput.StartsWith("/join ", StringComparison.OrdinalIgnoreCase))
+            {
+                
+                string argsString = trimmedInput.Substring("/join ".Length);
+
+                // Parse arguments specifically for Join
+                string[] parsedArgs = JoinMessage.ParseJoinMessageArgs(argsString, tcpChatClient);
+                return new JoinMessage
+                (
+                    channelId: parsedArgs[0],
+                    displayName: tcpChatClient.DisplayName
+                );
+                
+            }
             return null;
         }
-
-        
-
     } // End of Message class
 }

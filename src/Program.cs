@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CommandLine;
 
 
 namespace Ipk25Chat {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             TcpChatClient tcpClient = null;
             // Create a parser instance with default settings
@@ -18,10 +19,10 @@ namespace Ipk25Chat {
             // Parse command line arguments
             var parserResult = parser.ParseArguments<CliOptions>(args);
 
-            // Handle the parsing result
+            // success parsing
             parserResult.WithParsed<CliOptions>(options =>
             {
-                // Parsing succeeded
+                
                 if(options.Transport == TransportProtocol.Tcp) {
                     tcpClient = new TcpChatClient(options.Server, options.Port);
                 }
@@ -31,15 +32,15 @@ namespace Ipk25Chat {
             .WithNotParsed<CliOptions>((errors) =>
             {
                 // Parsing failed or the user requested help (-h/--help)
-                Console.WriteLine("Argument parsing failed or help requested.");
+                Console.Error.WriteLine("Argument parsing failed or help requested.");
             });
 
-            Console.WriteLine(tcpClient.ToString());
+            //Console.Error.WriteLine("Debug: Tcp clients fields: " + tcpClient.ToString());
 
 
             if(tcpClient != null) {
-                tcpClient.Start();
-                Console.ReadKey();
+                await tcpClient.Start();
+                //Console.ReadKey();
             }
             
         }

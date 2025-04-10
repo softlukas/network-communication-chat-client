@@ -1,32 +1,64 @@
 using System;
 using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Ipk25Chat
 {
+    // Enum representing the different states of the client.
+    public enum ClientState
+    {
+        // Initial state after program start, waiting for /auth.
+        Start,
+
+        // State after sending AUTH, waiting for REPLY. ('auth' node)
+        Auth,
+
+        // State after sending JOIN, waiting for REPLY. ('join' node)
+        Join,
+
+        // State after successful auth/join, ready for MSG. ('open' node)
+        Open,
+
+        // Final disconnected state. ('end' node)
+        End
+    }
+
     public class TcpChatClient
     {
-        private IPAddress _server;
+        
+        private IPAddress _server; // Server addresd (after translating from domain name)
 
-        private enum ClientState
+        public string DisplayName { get; set; } // Display name of the client
+
+        private readonly object _stateLock = new object(); // Lock for thread-safe state access
+        
+        private readonly IMessageParser _messageParser; // MessageParser interface
+
+        // Property to get or set the current state of the client inside lock
+        public ClientState CurrentState
         {
-            // Initial state after program start, waiting for /auth.
-            Start,
-
-            // State after sending AUTH, waiting for REPLY. ('auth' node)
-            Auth,
-
-            // State after sending JOIN, waiting for REPLY. ('join' node)
-            Join,
-
-            // State after successful auth/join, ready for MSG. ('open' node)
-            Chat,
-
-            // Final disconnected state. ('end' node)
-            End
+            get
+            {
+                lock (_stateLock)
+                {
+                    return _currentState;
+                }
+            }
+            set
+            {
+                lock (_stateLock)
+                {
+                    Console.Error.WriteLine("Debug: Changing state to " + value.ToString());
+                    _currentState = value;
+                }
+            }
         }
+        private ClientState _currentState = ClientState.Start; // Initial state
 
-        private ClientState currentState = ClientState.Start;
-
+        // Property to get or set the server address (use dns if required)
         public string Server 
         {
             get { return _server.ToString(); }
@@ -41,10 +73,11 @@ namespace Ipk25Chat
                     // Try to resolve the domain name to an IP address
                     try
                     {
-                        var addresses = Dns.GetHostAddresses(value);
+                        var addresses = Dns.GetHostAddresses(value).Where(addr => addr.AddressFamily == AddressFamily.InterNetwork).ToArray();
                         if (addresses.Length > 0)
                         {
                             _server = addresses[0];
+                                
                         }
                     }
                     catch (Exception ex)
@@ -56,14 +89,20 @@ namespace Ipk25Chat
                 
             }
         }
-        private ushort _port;
+        private ushort _port; // Port number of the server
+        private TcpClient? _client; // TcpClient instance for network communication                                                                          
+        private NetworkStream? _stream; // NetworkStream for reading/writing data
 
-        public TcpChatClient(string server, ushort port)
+        // CancellationTokenSource for managing cancellation
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource(); 
+        
+        public TcpChatClient(string server, ushort port, IMessageParser parser)
         {
+            _messageParser = parser;
             Server = server;
             _port = port;
         }
-
+        
         public async Task Start() {
             while(currentState != ClientState.End) {
                 switch(currentState) {

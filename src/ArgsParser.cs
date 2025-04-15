@@ -12,10 +12,10 @@ public enum TransportProtocol
 // Class to hold the argument values
 public class CliOptions
 {
-    [Option('t', "transport", Required = false, HelpText = "Transport protocol to use (tcp or udp).")]
+    [Option('t', "transport", Required = true, HelpText = "Transport protocol to use (tcp or udp).")]
     public TransportProtocol Transport { get; set; }
 
-    [Option('s', "server", Required = false, HelpText = "Server IP address or hostname.")]
+    [Option('s', "server", Required = true, HelpText = "Server IP address or hostname.")]
     public string Server { get; set; } = string.Empty; // Initialize for C# nullability compliance
 
     [Option('p', "port", Required = false, Default = (ushort)4567, HelpText = "Server port.")]

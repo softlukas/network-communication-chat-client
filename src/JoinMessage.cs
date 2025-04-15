@@ -2,10 +2,9 @@ using System.Text;
 namespace Ipk25Chat
 {
     // Represents the data required for a JOIN message
-    // used by the client to request joining a channel.
-    public class JoinMessage : Message // Inherits from the base Message class
+    public class JoinMessage : Message
     {
-        // Gets the message type, which is always JOIN for this class.
+        // Gets the message type, which is always JOIN for this class
         public override MessageType Type => MessageType.JOIN;
 
         public string ChannelID { get; private set; }
@@ -27,7 +26,7 @@ namespace Ipk25Chat
                 return null;
             }
 
-            // Split arguments, expect 3 parts
+            // Split arguments, expect 1 part
             string[] parts = argsString.Split(new[] { ' ' }, 3, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 1)
@@ -43,7 +42,7 @@ namespace Ipk25Chat
             }
         }
 
-        public override byte[] GetTcpPayload()
+        public override byte[] GetBytesInTcpGrammar()
         {
             
             string dataString = $"JOIN {ChannelID} AS {DisplayName}\r\n";

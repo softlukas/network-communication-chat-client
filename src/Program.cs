@@ -8,7 +8,9 @@ namespace Ipk25Chat {
     {
         public static async Task Main(string[] args)
         {
+            
             TcpChatClient tcpClient = null;
+            UdpChatClient udpClient = null;
             // Create a parser instance with default settings
             var parser = new Parser(with =>
             {
@@ -26,6 +28,13 @@ namespace Ipk25Chat {
                 if(options.Transport == TransportProtocol.Tcp) {
                     tcpClient = new TcpChatClient(options.Server, options.Port);
                 }
+
+                else if (options.Transport == TransportProtocol.Udp) {
+                    Console.Error.WriteLine($"Debug: Starting UDP Client (Timeout: {options.TimeoutMs}ms, Retries: {options.MaxRetries})");
+                   
+                    udpClient = new UdpChatClient(options); 
+                    
+                }
                 
                 
             })
@@ -35,14 +44,21 @@ namespace Ipk25Chat {
                 Console.Error.WriteLine("Argument parsing failed or help requested.");
             });
 
-            //Console.Error.WriteLine("Debug: Tcp clients fields: " + tcpClient.ToString());
-
-
+           
             if(tcpClient != null) {
+                Console.CancelKeyPress += tcpClient.Console_CancelKeyPress;
                 await tcpClient.Start();
-                //Console.ReadKey();
+            }
+            else if(udpClient != null) {
+                Console.CancelKeyPress += udpClient.Console_CancelKeyPress;
+                await udpClient.RunAsync();
+            }
+            else {
+                Console.Error.WriteLine("ERROR: No client created.");
             }
             
         }
+
+        
     }
 }

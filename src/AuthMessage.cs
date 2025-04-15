@@ -105,9 +105,7 @@ public class AuthMessage : Message
     {
         
         string dataString = $"AUTH {this.Username} AS {this.DisplayName} USING {this.Secret}\r\n";
-        Console.WriteLine($"Debug: TCP payload: {dataString}");
        
-
         byte[] dataBytes = Encoding.ASCII.GetBytes(dataString);
 
         return dataBytes;

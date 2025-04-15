@@ -454,6 +454,13 @@ namespace Ipk25Chat
         }
     }
 
+    public void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
+        ByeMessage byeMessage = new ByeMessage(this.DisplayName);
+        SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
+        CurrentState = ClientState.End;
+    }
+
 
 
     }

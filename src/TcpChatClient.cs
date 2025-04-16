@@ -354,6 +354,15 @@ namespace Ipk25Chat
                         currentBufferContent = currentBufferContent.Substring(messageEndPos + terminator.Length);
                         var message = TcpMessageParser.WriteParsedTcpIncomingMessage(rawMessage, tcpChatClient: this);
 
+                        if(message == null) {
+                            // malformed message
+                            Console.WriteLine("Malformed message received.");
+                            ErrMessage errMessage = new ErrMessage(this.DisplayName, "Malformed message received.");
+                            await SendPayloadAsync(errMessage.GetBytesInTcpGrammar());
+                            await DisconnectAsync("Malformed message received");
+                            Environment.Exit(1);
+                        }
+
                         if (message is ByeMessage)
                         {
                             Console.WriteLine("Bye message received, disconnecting...");

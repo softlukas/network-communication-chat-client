@@ -7,15 +7,6 @@ using System.Threading.Tasks;
 
 namespace Ipk25Chat
 {
-    public enum ClientState
-    {
-        Start,
-        Auth,
-        Join,
-        Open,
-        End
-    }
-
     public class TcpChatClient : ChatClient
     {
         private TcpClient? _client;

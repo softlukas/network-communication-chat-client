@@ -7,6 +7,15 @@ using System.Text;
 namespace Ipk25Chat {
 
 
+    public enum ClientState
+    {
+        Start,
+        Auth,
+        Join,
+        Open,
+        End
+    }
+
     public class ChatClient {
        
         protected IPAddress _server; // Server address (after translating from domain name)

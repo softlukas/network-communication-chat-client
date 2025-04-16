@@ -9,216 +9,193 @@ namespace Ipk25Chat
 {
     public class TcpChatClient : ChatClient
     {
+        // TCP client and stream for network communication
         private TcpClient? _client;
+        // NetworkStream for reading/writing data
         private NetworkStream? _stream;
+        // Cancellation token source for managing cancellation
         private readonly CancellationTokenSource _cts = new CancellationTokenSource(); 
+        // StringBuilder for buffering incoming messages
         private readonly StringBuilder _receiveBuffer = new StringBuilder();
-        
-        public TcpChatClient(string server, ushort port) : base (server, port)
+        // base constructor
+        public TcpChatClient(string server, ushort port) : base(server, port) { }
+
+        // start point for the client
+        public async Task Start()
         {
-           
-        }
-        
-        public async Task Start() {
-            byte[] payload = new byte[1000];
+            // Set up console cancel event handler
+            byte[] payload = new byte[60000];
+
             Message? message = null;
 
-            while(CurrentState != ClientState.End) {
-                switch(CurrentState) {
-                    case ClientState.Start:
-                        try {
-                            ConnectAsync();
-                            Console.Error.WriteLine("Debug: Connected succesfully");
+            // fsm implementation
+            while (CurrentState != ClientState.End)
+            {
+                try
+                {
+                    switch (CurrentState)
+                    {
+                        case ClientState.Start:
+                            await HandleStartStateAsync();
+                            break;
 
-                            message = await Message.CreateMessageFromUserInputAsync(this);
-                            if(message == null) {
-                                Console.WriteLine("ERROR: Undifined command");
-                                break;
-                            }
+                        case ClientState.Auth:
+                            await HandleAuthStateAsync();
+                            break;
 
-                            switch (message)
-                            {
-                                case AuthMessage authMessage:
-                                    SendPayloadAsync(authMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.Auth;
-                                    break;
-                                case ByeMessage byeMessage:
-                                    SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.End;
-                                    break;
-                                default:
-                                    Console.WriteLine("ERROR: Unsupported command in state " + CurrentState);
-                                    break;
-                            }
+                        case ClientState.Open:
+                            await HandleOpenStateAsync();
+                            break;
 
-                            Thread.Sleep(100);
-                        }
-                        catch(ArgumentException ex) {
-                            ByeMessage byeMessage = new ByeMessage(this.DisplayName);
-                            SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                            CurrentState = ClientState.End;
-                        }
-                        catch(Exception ex) {
-                            Console.Error.WriteLine($"Error: {ex}");
-                            await DisconnectAsync("Auth failed.");
-                            Environment.Exit(1);
-                        }
-                        finally {
-                        }
-                        break;
+                        case ClientState.Join:
+                            await HandleJoinStateAsync();
+                            break;
 
-                    case ClientState.Auth:
-                        try {
-                            message = await Message.CreateMessageFromUserInputAsync(this);
-                            if (message == null) {
-                                Console.WriteLine("ERROR: Undifined command");
-                                break;
-                            }
-
-                            switch (message)
-                            {
-                                case AuthMessage authMessage:
-                                    SendPayloadAsync(authMessage.GetBytesInTcpGrammar());
-                                    break;
-                                case ByeMessage byeMessage:
-                                    SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.End;
-                                    break;
-                                case ErrMessage errMessage:
-                                    SendPayloadAsync(errMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.End;
-                                    break;
-                                default:
-                                    Console.WriteLine("ERROR: Unsupported command in state " + CurrentState);
-                                    break;
-                            }
-
-                            Thread.Sleep(100);
-                        }
-                        catch(ArgumentException ex) {
-                            ByeMessage byeMessage = new ByeMessage(this.DisplayName);
-                            SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                            CurrentState = ClientState.End;
-                        }
-                        catch(Exception ex) {
-                            Console.Error.WriteLine($"Error: {ex}");
-                            await DisconnectAsync("Auth failed.");
-                            Environment.Exit(1);
-                        }
-                        finally {
-                        }
-                        break;
-
-                    case ClientState.Open:
-                        try {
-                            message = await Message.CreateMessageFromUserInputAsync(this);
-                            if (message == null) {
-                                Console.WriteLine("ERROR: Undifined command");
-                                break;
-                            }
-
-                            switch (message)
-                            {
-                                case PingMessage pingMessage:
-                                    break;
-                                case MsgMessage msgMessage:
-                                    SendPayloadAsync(msgMessage.GetBytesInTcpGrammar());
-                                    break;
-                                case AuthMessage authMessage:
-                                    SendPayloadAsync(authMessage.GetBytesInTcpGrammar());
-                                    break;
-                                case ByeMessage byeMessage:
-                                    SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.End;
-                                    break;
-                                case ErrMessage errMessage:
-                                    SendPayloadAsync(errMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.End;
-                                    break;
-                                case JoinMessage joinMessage:
-                                    SendPayloadAsync(joinMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.Join;
-                                    break;
-                                default:
-                                    Console.WriteLine("ERROR: Unsupported command in state " + CurrentState);
-                                    break;
-                            }
-
-                            Thread.Sleep(100);
-                        }
-                        catch(ArgumentException ex) {
-                            ByeMessage byeMessage = new ByeMessage(this.DisplayName);
-                            SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                            CurrentState = ClientState.End;
-                        }
-                        catch(Exception ex) {
-                            Console.Error.WriteLine($"Error: {ex}");
-                            await DisconnectAsync("Auth failed.");
-                            Environment.Exit(1);
-                        }
-                        finally {
-                        }
-                        break;
-
-                    case ClientState.Join:
-                        try {
-                            message = await Message.CreateMessageFromUserInputAsync(this);
-                            if (message == null) {
-                                Console.WriteLine("ERROR: Undifined command");
-                                break;
-                            }
-
-                            switch (message)
-                            {
-                                case ByeMessage byeMessage:
-                                    SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                                    CurrentState = ClientState.End;
-                                    break;
-                                default:
-                                    Console.WriteLine("ERROR: Unsupported command in state " + CurrentState);
-                                    break;
-                            }
-
-                            Thread.Sleep(1000);
-                        }
-                        catch(Exception ex) {
-                            Console.Error.WriteLine($"Error: {ex}");
-                            await DisconnectAsync("Auth failed.");
-                            Environment.Exit(1);
-                        }
-                        finally {
-                        }
-                        break;
-
-                    case ClientState.End:
-                        Console.Error.WriteLine("Debug: End state reached");
-                        DisconnectAsync("end state reach");
-                        Environment.Exit(0);
-                        break;
+                        case ClientState.End:
+                            Console.Error.WriteLine("Debug: End state reached");
+                            await DisconnectAsync("End state reached");
+                            Environment.Exit(0);
+                            break;
+                    }
+                }
+                // cath invalid input
+                catch (ArgumentException ex)
+                {
+                    await HandleArgumentExceptionAsync(ex.Message);
+                }
+                // undifined exception
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error: {ex}");
+                    await DisconnectAsync("Auth failed.");
+                    Environment.Exit(1);
                 }
             }
 
             Console.Error.WriteLine("Debug: End state reached");
-            DisconnectAsync("end state reach");
+            await DisconnectAsync("End state reached");
             Environment.Exit(0);
         }
 
-        private void SendByeMessage(Message message)
+        private async Task HandleStartStateAsync()
         {
-            ByeMessage byeMessage = (ByeMessage) message;
-            SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-            CurrentState = ClientState.End;
+            bool connected = await ConnectAsync();
+            if(!connected)
+            {
+                Environment.Exit(0);
+            }
+            
+            Console.Error.WriteLine("Debug: Connected successfully");
+            
+
+            var message = await Message.CreateMessageFromUserInputAsync(this);
+            if (message == null)
+            {
+                Console.WriteLine("ERROR: Undefined command");
+                return;
+            }
+
+            await ProcessMessageAsync(message, ClientState.Auth);
+        }
+
+        private async Task HandleAuthStateAsync()
+        {
+            var message = await Message.CreateMessageFromUserInputAsync(this);
+            if (message == null)
+            {
+                Console.WriteLine("ERROR: Undefined command");
+                return;
+            }
+
+            await ProcessMessageAsync(message, ClientState.Auth);
+        }
+
+        private async Task HandleOpenStateAsync()
+        {
+            var message = await Message.CreateMessageFromUserInputAsync(this);
+            if (message == null)
+            {
+                Console.WriteLine("ERROR: Undefined command");
+                return;
+            }
+
+            await ProcessMessageAsync(message, ClientState.Open);
+        }
+
+        private async Task HandleJoinStateAsync()
+        {
+            var message = await Message.CreateMessageFromUserInputAsync(this);
+            if (message == null)
+            {
+                Console.WriteLine("ERROR: Undefined command");
+                return;
+            }
+
+            if (message is ByeMessage byeMessage)
+            {
+                await SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
+                CurrentState = ClientState.End;
+            }
+            else
+            {
+                Console.WriteLine("ERROR: Unsupported command in state " + CurrentState);
+            }
+
+            await Task.Delay(100);
+        }
+
+        private async Task ProcessMessageAsync(Message message, ClientState nextState)
+        {
+            switch (message)
+            {
+                case AuthMessage authMessage:
+                    await SendPayloadAsync(authMessage.GetBytesInTcpGrammar());
+                    CurrentState = nextState;
+                    break;
+
+                case ByeMessage byeMessage:
+                    await SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
+                    CurrentState = ClientState.End;
+                    break;
+
+                case ErrMessage errMessage:
+                    await SendPayloadAsync(errMessage.GetBytesInTcpGrammar());
+                    CurrentState = ClientState.End;
+                    break;
+
+                case MsgMessage msgMessage when nextState == ClientState.Open:
+                    await SendPayloadAsync(msgMessage.GetBytesInTcpGrammar());
+                    break;
+
+                case JoinMessage joinMessage when nextState == ClientState.Open:
+                    await SendPayloadAsync(joinMessage.GetBytesInTcpGrammar());
+                    CurrentState = ClientState.Join;
+                    break;
+
+                default:
+                    Console.WriteLine("ERROR: Unsupported command in state " + CurrentState);
+                    break;
+            }
+
+            await Task.Delay(100);
+        }
+
+        private async Task HandleArgumentExceptionAsync(string message)
+        {
+            Console.WriteLine(message);
         }
 
         private async Task<bool> SendPayloadAsync(byte[] payload)
         {
-            if (_stream == null || !_stream.CanWrite)
+            if (_client == null || !_client.Connected || _stream == null || !_stream.CanWrite)
             {
-                await DisconnectAsync("Send failed - stream error.");
+                Console.Error.WriteLine("Send failed - client not connected or stream error.");
+                await DisconnectAsync("Send failed - client not connected or stream error.");
                 return false;
             }
 
-            if (payload == null || payload.Length == 0) {
+            if (payload == null || payload.Length == 0)
+            {
                 Console.Error.WriteLine("Cannot send null or empty payload.");
                 return false;
             }
@@ -242,7 +219,7 @@ namespace Ipk25Chat
             catch (ObjectDisposedException)
             {
                 Console.Error.WriteLine("Cannot send payload: Connection already closed.");
-                CurrentState = (ClientState.End);
+                CurrentState = ClientState.End;
                 return false;
             }
             catch (Exception ex)
@@ -253,8 +230,12 @@ namespace Ipk25Chat
             }
         }
 
-        private async Task<bool> ConnectAsync()
-        {
+        private async Task<bool> ConnectAsync() {
+            if (_client != null && _client.Connected)
+            {
+                Console.Error.WriteLine("Debug: Already connected.");
+                return true;
+            }
             if (_client != null && _client.Connected) return true;
 
             Console.Error.WriteLine($"Debug: Connecting to {_server}:{_port} via TCP...");
@@ -307,9 +288,7 @@ namespace Ipk25Chat
                 {
                     _cts.Cancel();
                 }
-                catch (ObjectDisposedException)
-                {
-                }
+                catch (ObjectDisposedException) { }
             }
 
             NetworkStream? streamToClose = _stream;
@@ -375,9 +354,10 @@ namespace Ipk25Chat
                         currentBufferContent = currentBufferContent.Substring(messageEndPos + terminator.Length);
                         var message = TcpMessageParser.WriteParsedTcpIncomingMessage(rawMessage, tcpChatClient: this);
 
-                        if(message is ByeMessage) {
+                        if (message is ByeMessage)
+                        {
                             Console.WriteLine("Bye message received, disconnecting...");
-                            DisconnectAsync("Bye message received.");
+                            await DisconnectAsync("Bye message received.");
                             Environment.Exit(0);
                             CurrentState = ClientState.End;
                         }
@@ -387,10 +367,12 @@ namespace Ipk25Chat
                     _receiveBuffer.Append(currentBufferContent);
                 }
             }
-            catch (OperationCanceledException) 
+            catch (OperationCanceledException) { }
+            catch (Exception ex) 
             { 
+                if (!token.IsCancellationRequested) 
+                    Console.Error.WriteLine($"Receive loop error: {ex}"); 
             }
-            catch (Exception ex) { if (!token.IsCancellationRequested) Console.Error.WriteLine($"Receive loop error: {ex}"); }
             finally
             {
                 if (!token.IsCancellationRequested && CurrentState != ClientState.End)
@@ -402,9 +384,12 @@ namespace Ipk25Chat
 
         public void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
         {
-            ByeMessage byeMessage = new ByeMessage(this.DisplayName);
+            var byeMessage = new ByeMessage(this.DisplayName);
             SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
+            DisconnectAsync("Console cancel key press.");
+            Environment.Exit(0);
             CurrentState = ClientState.End;
+           
         }
     }
 }

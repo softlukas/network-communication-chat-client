@@ -1,5 +1,6 @@
 src/obj/
 src/bin/
 src/server.py
+src/udp_server.py
 *.sln
 token.txt

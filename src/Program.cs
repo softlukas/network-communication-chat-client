@@ -32,7 +32,7 @@ namespace Ipk25Chat {
                 else if (options.Transport == TransportProtocol.Udp) {
                     Console.Error.WriteLine($"Debug: Starting UDP Client (Timeout: {options.TimeoutMs}ms, Retries: {options.MaxRetries})");
                    
-                    udpClient = new UdpChatClient(options); 
+                    udpClient = new UdpChatClient(options.Server, options.Port, options.TimeoutMs, options.MaxRetries); 
                     
                 }
                 

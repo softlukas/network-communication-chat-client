@@ -1,8 +1,6 @@
 using System.Text;
 namespace Ipk25Chat
 {
-    // Represents the data for a BYE message, used by either client or server
-    // to signal the intention to gracefully terminate the connection.
     public class ByeMessage : Message // Dedí od základnej triedy Message
     {
         // Gets the message type, which is always BYE for this class.
@@ -14,13 +12,12 @@ namespace Ipk25Chat
 
         public ByeMessage(string displayName)
         {
-            // Initialize the display name
             DisplayName = displayName;
         }
-        public override byte[] GetTcpPayload()
+        public override byte[] GetBytesInTcpGrammar()
         {
             // Format the message as "BYE {DisplayName}\r\n"
-            string dataString = $"BYE {this.DisplayName}\r\n";
+            string dataString = $"BYE FROM {this.DisplayName}\r\n";
 
             // Convert the string to a byte array using ASCII encoding
             byte[] dataBytes = Encoding.ASCII.GetBytes(dataString);

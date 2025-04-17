@@ -120,7 +120,6 @@ namespace Ipk25Chat
                 }
 
                 tcpChatClient.DisplayName = newDisplayName;
-                return new PingMessage();
             }
             
             if (tcpChatClient.CurrentState == ClientState.Open && trimmedInput != "/quit" && !trimmedInput.Contains("/join"))

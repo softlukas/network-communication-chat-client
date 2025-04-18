@@ -4,3 +4,9 @@ src/server.py
 src/udp_server.py
 *.sln
 token.txt
+TODO.txt
+*.py
+__pycache__/
+ipk25chat-client
+ipk25chat-client.pdb
+VUT_IPK_CLIENT_TESTS/

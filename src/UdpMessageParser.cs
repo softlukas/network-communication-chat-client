@@ -49,8 +49,8 @@ public class UdpMessageParser
                      case MessageType.ERR:
                           string errDisplayName = ReadNullTerminatedString(reader);
                           string errContent = ReadNullTerminatedString(reader);
-                          // parsedMsg = new ErrMessage { DisplayName = errDisplayName, MessageContent = errContent };
-                          break;
+                            ErrMessage errMessage = new ErrMessage(errDisplayName, errContent, messageId);
+                            return errMessage;
                       case MessageType.BYE:
                            string byeDisplayName = ReadNullTerminatedString(reader);
                             ByeMessage byeMessage = new ByeMessage(byeDisplayName, messageId);

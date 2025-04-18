@@ -417,6 +417,13 @@ public class UdpChatClient : ChatClient
                        Console.WriteLine(msgMessage.ToString());
                     }
 
+                    if(parsedMessage is ErrMessage) {
+                        ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
+                        SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
+                        ErrMessage errMessage = (ErrMessage)parsedMessage;
+                        Console.WriteLine(errMessage.ToString());
+                    }
+
 
 
                     

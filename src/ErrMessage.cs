@@ -24,6 +24,12 @@ namespace Ipk25Chat
             this.MessageContent = messageContent;
         }
 
+        public ErrMessage(string displayName, string messageContent, int messageId) : base(messageId)
+        {
+            this.DisplayName = displayName;
+            this.MessageContent = messageContent;
+        }
+
         public override string ToString()
         {
             // Format the message as "ERR {DisplayName} IS {MessageContent}"

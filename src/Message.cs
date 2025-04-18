@@ -99,7 +99,13 @@ namespace Ipk25Chat
                     secret: parsedArgs[1],
                     displayName: parsedArgs[2]
                     );
-                    tcpChatClient.CurrentState = ClientState.Auth;
+
+                    if(tcpChatClient.CurrentState != ClientState.Join && tcpChatClient.CurrentState != ClientState.Open)
+                    {
+                       tcpChatClient.CurrentState = ClientState.Auth;
+                    }
+                    
+                   
                 }
                 catch (ArgumentException ex)
                 {

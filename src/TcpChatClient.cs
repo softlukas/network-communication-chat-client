@@ -146,9 +146,10 @@ namespace Ipk25Chat
 
         private async Task ProcessMessageAsync(Message message, ClientState nextState)
         {
+            Console.Error.WriteLine("Debug: Processing message in state " + CurrentState);
             switch (message)
             {
-                case AuthMessage authMessage:
+                case AuthMessage authMessage when CurrentState != ClientState.Open && CurrentState != ClientState.Join:
                     await SendPayloadAsync(authMessage.GetBytesInTcpGrammar());
                     CurrentState = nextState;
                     break;

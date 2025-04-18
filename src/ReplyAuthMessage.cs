@@ -14,6 +14,12 @@ public class ReplyAuthMessage : Message
         MessageContent = messageContent;
     }
 
+    public ReplyAuthMessage(bool isSuccess, string messageContent, int messageId) : base(messageId)
+    {
+        IsSuccess = isSuccess;
+        MessageContent = messageContent;
+    }
+
     public override byte[] GetBytesInTcpGrammar()
     {
         return null;

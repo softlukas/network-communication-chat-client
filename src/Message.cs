@@ -126,6 +126,7 @@ namespace Ipk25Chat
                 }
 
                 tcpChatClient.DisplayName = newDisplayName;
+                throw new ArgumentException("rename");
             }
             
             if (tcpChatClient.CurrentState == ClientState.Open && trimmedInput != "/quit" && !trimmedInput.Contains("/join"))
@@ -146,7 +147,7 @@ namespace Ipk25Chat
                 string argsString = trimmedInput.Substring("/join ".Length);
 
                 // Parse arguments specifically for Join
-                string[] parsedArgs = JoinMessage.ParseJoinMessageArgs(argsString, tcpChatClient);
+                string[] parsedArgs = JoinMessage.ParseJoinMessageArgs(argsString);
                 
                 return new JoinMessage
                 (

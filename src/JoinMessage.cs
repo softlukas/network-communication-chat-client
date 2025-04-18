@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text; 
 namespace Ipk25Chat
 {
@@ -18,7 +19,15 @@ namespace Ipk25Chat
             DisplayName = displayName;
         }
 
-        public static string[] ParseJoinMessageArgs(string argsString, TcpChatClient tcpChatClient)
+
+        public JoinMessage(string channelId, string displayName, int messageId) : base(messageId)
+        {
+            ChannelID = channelId;
+            DisplayName = displayName;
+        }
+
+
+        public static string[] ParseJoinMessageArgs(string argsString)
         {
             if (string.IsNullOrWhiteSpace(argsString))
             {
@@ -52,5 +61,37 @@ namespace Ipk25Chat
             // Return the byte array
             return dataBytes;
         }
+
+        public override byte[] GetBytesForUdpPacket()
+        {
+            
+            using (var memoryStream = new MemoryStream())
+            
+            using (var writer = new BinaryWriter(memoryStream, Encoding.ASCII, false))
+            {
+                
+                writer.Write((byte)this.Type);
+
+               
+                short networkOrderMessageId = IPAddress.HostToNetworkOrder((short)this.MessageId);
+
+                // messageID without 0
+                writer.Write(networkOrderMessageId);
+
+
+                WriteNullTerminated(writer, this.ChannelID);
+
+                // displayName + 0
+                WriteNullTerminated(writer, this.DisplayName);
+
+            
+                writer.Flush();
+
+                // Return the contents of the MemoryStream as a byte array
+                return memoryStream.ToArray();
+            }
+        }
+
+       
     }
 }

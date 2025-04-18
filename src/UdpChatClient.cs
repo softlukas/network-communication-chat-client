@@ -203,6 +203,13 @@ public class UdpChatClient : ChatClient
                 SendByeMessageAsync();
             }
             catch(ArgumentException ex) {
+                if(ex.Message == "rename") {
+                    continue;
+                }
+                else {
+                    Console.WriteLine("ERROR: " + ex.Message);
+                }
+
                 Console.WriteLine("ERROR: " + ex.Message);
             }
             catch(Exception ex) {
@@ -375,6 +382,7 @@ public class UdpChatClient : ChatClient
 
                             ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
                             SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
+                            Console.Error.WriteLine("Debug: I am here");
                             CurrentState = ClientState.Open;
                             
                             //Console.Error.WriteLine("DEBUG: Received REPLY from server. Authentication successful.");
@@ -488,7 +496,6 @@ public class UdpChatClient : ChatClient
                 }
                 Console.Error.WriteLine("Debug: payload sent to server");
                 WaitConfirm(authMessage, payload);
-                CurrentState = ClientState.Auth;
                 break;
 
             case ByeMessage byeMessage:
@@ -505,6 +512,10 @@ public class UdpChatClient : ChatClient
 
             case MsgMessage msgMessage when CurrentState == ClientState.Open:
                 byte[] msgPayload = msgMessage.GetBytesForUdpPacket();
+                Console.Error.WriteLine("Debug: msg payload");
+                foreach(byte item in msgPayload) {
+                    Console.Error.Write(item + " ");
+                }
                 SendUdpPayloadToServer(msgPayload);
                 WaitConfirm(msgMessage, msgPayload);
                 break;

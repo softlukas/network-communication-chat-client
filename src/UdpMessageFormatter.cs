@@ -29,6 +29,22 @@ public class UdpMessageFormatter
 
         //Console.Error.WriteLine($"Debug: User input: {trimmedInput}");
 
+        if (trimmedInput.StartsWith("/rename ", StringComparison.OrdinalIgnoreCase))
+        {
+            string newDisplayName = trimmedInput.Substring("/rename ".Length);
+
+            if (string.IsNullOrWhiteSpace(newDisplayName))
+            {
+                Console.Error.WriteLine("Error: Display name cannot be empty.");
+                return null;
+            }
+
+            udpChatClient.DisplayName = newDisplayName;
+            Console.Error.WriteLine($"Debug: Display name changed to {udpChatClient.DisplayName}");
+            throw new ArgumentException("rename");
+        }
+
+
         // Check for /auth command
         if (trimmedInput.StartsWith("/auth ", StringComparison.OrdinalIgnoreCase))
         {

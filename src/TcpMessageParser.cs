@@ -90,13 +90,14 @@ public static class TcpMessageParser
                 return byeMessage;
             }
 
-            if(rawData.StartsWith("ERROR FROM "))
+            if(rawData.StartsWith("ERR FROM "))
             {
                 string prefix = "ERR FROM ";
                 string infix = " IS ";
                 // Find the position of " IS " after "ERR FROM "
                 int isIndex = rawData.IndexOf(infix, prefix.Length);
                 Console.Error.WriteLine($"Debug: isIndex: {isIndex}");
+                Console.Error.WriteLine("Here");
                 if (isIndex > prefix.Length) // Check if " IS " was found and is after DisplayName
                 {
                     // Extract DisplayName (between "ERR FROM " and " IS ")

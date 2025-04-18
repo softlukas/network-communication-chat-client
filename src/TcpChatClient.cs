@@ -112,14 +112,29 @@ namespace Ipk25Chat
 
         private async Task HandleOpenStateAsync()
         {
-            var message = await Message.CreateMessageFromUserInputAsync(this);
-            if (message == null)
-            {
-                Console.WriteLine("ERROR: Undefined command");
-                return;
-            }
+            try {
+                var message = await Message.CreateMessageFromUserInputAsync(this);
 
-            await ProcessMessageAsync(message, ClientState.Open);
+                if (message == null)
+                {
+                    Console.WriteLine("ERROR: Undefined command");
+                    return;
+                }
+
+                await ProcessMessageAsync(message, ClientState.Open);
+
+
+            }
+            
+            
+            
+            catch(ArgumentException ex)
+            {
+                if(ex.Message == "rename") {
+                    return;
+                }
+            
+            }
         }
 
         private async Task HandleJoinStateAsync()

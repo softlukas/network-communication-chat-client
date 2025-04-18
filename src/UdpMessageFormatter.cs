@@ -44,6 +44,13 @@ public class UdpMessageFormatter
             throw new ArgumentException("rename");
         }
 
+        if (trimmedInput.StartsWith("/help", StringComparison.OrdinalIgnoreCase))
+        {
+            
+            throw new ArgumentException("help");
+        }
+        
+
 
         // Check for /auth command
         if (trimmedInput.StartsWith("/auth ", StringComparison.OrdinalIgnoreCase))

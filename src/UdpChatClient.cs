@@ -252,7 +252,7 @@ public class UdpChatClient : ChatClient
 
     private void StartRetryLoop(int messageId, UdpSentMessageInfo sentMessageInfo)
     {
-        Console.WriteLine("Current messageId passed to the function:" + messageId);
+        Console.Error.WriteLine("Current messageId passed to the function:" + messageId);
         Task.Run(async () =>
         {
             while (sentMessageInfo.RetryCount < _maxRetries)
@@ -267,7 +267,7 @@ public class UdpChatClient : ChatClient
                 }
 
                 // Retry sending the message
-                Console.WriteLine($"DEBUG: Retrying message ID {messageId}, attempt {sentMessageInfo.RetryCount + 1}");
+                Console.Error.WriteLine($"DEBUG: Retrying message ID {messageId}, attempt {sentMessageInfo.RetryCount + 1}");
                 try
                 {
                     _socket?.SendTo(sentMessageInfo.Payload, SocketFlags.None, sentMessageInfo.TargetEndPoint);
@@ -521,8 +521,9 @@ public class UdpChatClient : ChatClient
                 break;
 
             case JoinMessage joinMessage when CurrentState == ClientState.Open:
-                //await SendPayloadAsync(joinMessage.GetBytesInTcpGrammar());
-                //CurrentState = ClientState.Join;
+                byte[] joinPayload = joinMessage.GetBytesForUdpPacket();
+                SendUdpPayloadToServer(joinPayload);
+                WaitConfirm(joinMessage, joinPayload);
                 break;
 
             default:

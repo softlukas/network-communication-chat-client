@@ -174,7 +174,7 @@ public class UdpChatClient : ChatClient
         //_ = Task.Run(() => ReceiveLoopAsyncUdp(_cts.Token), _cts.Token);
          // Move to next state
         
-        SentAuthMessage();
+        SendAuthMessage();
         
         CurrentState = ClientState.Auth;
         Thread.Sleep(100);
@@ -183,66 +183,36 @@ public class UdpChatClient : ChatClient
 
     
     public async Task RunAsync() {
+
+        InitializeSocket();
+        Console.Error.WriteLine("Debug: clientsate: " + CurrentState.ToString());
+        _ = Task.Run(() => ReceiveLoopAsync(_cts.Token), _cts.Token);
+
         while(CurrentState != ClientState.End) {
+            try {
+                Message? message = UdpMessageFormatter.CreateMessageFromUserInputAsync(GetNextMessageId(), this);
 
-            switch(CurrentState) {
-                case ClientState.Start:
-                    // Initialize socket and bind
-                    InitializeSocket();
-                    Console.Error.WriteLine("Debug: clientsate: " + CurrentState.ToString());
-                    _ = Task.Run(() => ReceiveLoopAsync(_cts.Token), _cts.Token);
-                    
-                    
-                    SentAuthMessage();
-                    
-                   
-                    Thread.Sleep(100);
-                    break;
+                if(message == null) {
+                    Console.WriteLine("ERROR: Invalid command. You need to enter /auth command.");
+                    continue;
+                }
 
-                case ClientState.Open:
-                    //MsgMessage msgMessage = (MsgMessage) UdpMessageFormatter.CreateMessageFromUserInputAsync(GetNextMessageId());
-                    SentMsgMessage();
-                    break;
-
-                case ClientState.Auth:
-                    Console.Error.WriteLine("Debug: I am in auth state");
-                    SentAuthMessage();
-                    break;
-
-                case ClientState.End:
-                    // Cleanup and exit
-                    //await DisconnectAsync("Client ended.");
-                    break;
-
-                default:
-                    break;
+                ProcessMessageAsync(message);
             }
-
-        }
-    }
-    
-
-    private void SentMsgMessage() {
-        try {
-            MsgMessage msgMessage = (MsgMessage) UdpMessageFormatter.CreateMessageFromUserInputAsync(GetNextMessageId(), this);
-            byte[] payload = msgMessage.GetBytesForUdpPacket();
-            foreach(byte item in payload) {
-                Console.Error.WriteLine("Debug: payload byte: " + item);
+            catch(ArgumentNullException ex) {
+                SendByeMessageAsync();
             }
-            bool sent = SendUdpPayloadToServer(payload);
-            WaitConfirm(msgMessage, payload);
+            catch(ArgumentException ex) {
+                Console.WriteLine("ERROR: " + ex.Message);
+            }
+            catch(Exception ex) {
+                Console.WriteLine("ERROR: " + ex.Message);
+            }
+            
         }
-        catch(ArgumentNullException ex) {
-            SendByeMessageAsync();
-        }
-        catch(ArgumentException ex) {
-            Console.WriteLine("ERROR: " + ex.Message);
-        }
-        catch(Exception ex) {
-            Console.WriteLine("ERROR: " + ex.Message);
-        }
-        
-    }
+
+        // tu implementovat end state a disconnect
+    }   
 
     private async Task SendByeMessageAsync() {
         ByeMessage byeMessage = new ByeMessage(this.DisplayName, GetNextMessageId());
@@ -251,48 +221,7 @@ public class UdpChatClient : ChatClient
         WaitConfirm(byeMessage, payload);
     }
 
-    private async Task SentAuthMessage() {
-        try {
-            //int nextMessageId = GetNextMessageId();
-            AuthMessage authMessage = (AuthMessage) UdpMessageFormatter.CreateMessageFromUserInputAsync(GetNextMessageId(), this);
-            
-            if(authMessage == null) {
-                Console.WriteLine("ERROR: Invalid command. You need to enter /auth command.");
-                return;
-            }
-
-            switch(authMessage.Type) {
-                case MessageType.AUTH:
-                    break;
-                case MessageType.BYE:
-                    break;
-                default:
-                    Console.WriteLine("ERROR: Invalid command. You need to enter /auth command.");
-                    return;
-            }
-
-            DisplayName = authMessage.DisplayName;
-            
-            //Console.Error.WriteLine("Message id: " + authMessage.MessageId);
-            byte[] payload = authMessage.GetBytesForUdpPacket();
-
-
-            bool sent = SendUdpPayloadToServer(payload);
-            
-            WaitConfirm(authMessage, payload);
-            //CurrentState = ClientState.Auth;
-        }
-        catch(ArgumentNullException ex) {
-            SendByeMessageAsync();
-        }
-        catch(ArgumentException ex) {
-            Console.WriteLine("ERROR: " + ex.Message);
-        }
-        catch(Exception ex) {
-            Console.WriteLine("ERROR: " + ex.Message);
-        }
-        
-    }
+   
 
     private void WaitConfirm(Message message, byte[] payload) {
         IPEndPoint iPEndpoint = null;
@@ -370,7 +299,7 @@ public class UdpChatClient : ChatClient
 
         try
         {
-
+            // use only for debug print while develop !!!
             ushort payloadMessageId = (ushort)payload[2];
             int bytesSent = 0;
             if(_isAuthenticated) {
@@ -379,6 +308,8 @@ public class UdpChatClient : ChatClient
             }
             else {
                 bytesSent = _socket.SendTo(payload, SocketFlags.None, _initialServerEndPoint);
+                Console.Error.WriteLine("Debug: payload sent to initial server endpoint");
+                Console.Error.WriteLine(_initialServerEndPoint.ToString());
             }
                 
             if (bytesSent != payload.Length)
@@ -538,28 +469,42 @@ public class UdpChatClient : ChatClient
     {
         switch (message)
         {
-            case AuthMessage authMessage when nextState == ClientState.Auth || nextState == ClientState.Start:
-                await SendPayloadAsync(authMessage.GetBytesInTcpGrammar());
+            case AuthMessage authMessage when CurrentState == ClientState.Auth || CurrentState == ClientState.Start:
+                byte [] payload = authMessage.GetBytesForUdpPacket();
+
+                foreach(byte item in payload) {
+                    Console.Error.Write(item + " ");
+                }
+                if(!SendUdpPayloadToServer(payload)) {
+                    Console.Error.WriteLine("Debug: payload not sent to server");
+                    break;
+                }
+                Console.Error.WriteLine("Debug: payload sent to server");
+                WaitConfirm(authMessage, payload);
                 CurrentState = ClientState.Auth;
                 break;
 
             case ByeMessage byeMessage:
-                await SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
+                byte[] byePayload = byeMessage.GetBytesForUdpPacket();
+                SendUdpPayloadToServer(byePayload);
+                WaitConfirm(byeMessage, byePayload);
                 CurrentState = ClientState.End;
                 break;
 
             case ErrMessage errMessage:
-                await SendPayloadAsync(errMessage.GetBytesInTcpGrammar());
-                CurrentState = ClientState.End;
+                //await SendPayloadAsync(errMessage.GetBytesInTcpGrammar());
+                //CurrentState = ClientState.End;
                 break;
 
-            case MsgMessage msgMessage when nextState == ClientState.Open:
-                await SendPayloadAsync(msgMessage.GetBytesInTcpGrammar());
+            case MsgMessage msgMessage when CurrentState == ClientState.Open:
+                byte[] msgPayload = msgMessage.GetBytesForUdpPacket();
+                SendUdpPayloadToServer(msgPayload);
+                WaitConfirm(msgMessage, msgPayload);
                 break;
 
-            case JoinMessage joinMessage when nextState == ClientState.Open:
-                await SendPayloadAsync(joinMessage.GetBytesInTcpGrammar());
-                CurrentState = ClientState.Join;
+            case JoinMessage joinMessage when CurrentState == ClientState.Open:
+                //await SendPayloadAsync(joinMessage.GetBytesInTcpGrammar());
+                //CurrentState = ClientState.Join;
                 break;
 
             default:
@@ -567,7 +512,7 @@ public class UdpChatClient : ChatClient
                 break;
         }
 
-        await Task.Delay(100);
+        //await Task.Delay(100);
     }
     
 

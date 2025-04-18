@@ -59,19 +59,16 @@ public class UdpMessageParser
                            break;
                       case MessageType.CONFIRM: // Client receives CONFIRM from server
 
-                            Console.Error.WriteLine("Debug: byty co dosli ako reply");
+                            //Console.Error.WriteLine("Debug: byty co dosli ako reply");
 
-                            foreach(var b in data)
-                            {
-                                Console.Error.Write(b + " ");
-                            }
+                            
 
-                            Console.Error.WriteLine();
+                            //Console.Error.WriteLine();
 
                             ConfirmMessage confirmMessage = null;
 
 
-                            Console.Error.WriteLine("Debug: message with ID " + messageId + " was confirmed.");
+                            //Console.Error.WriteLine("Debug: message with ID " + messageId + " was confirmed.");
                             if (UdpChatClient._pendingConfirmationMessages.ContainsKey(messageId))
                             {
                                 UdpSentMessageInfo udpSentMessageInfo = UdpChatClient._pendingConfirmationMessages[messageId];
@@ -90,13 +87,15 @@ public class UdpMessageParser
                             return pingMessage;
                            
                      default:
-                           Console.Error.WriteLine($"WARN: UDP Parser received unknown message type byte: {messageTypeByte}");
+                           //Console.Error.WriteLine($"WARN: UDP Parser received unknown message type byte: {messageTypeByte}");
                            break; // Parsed message remains null
                 }
                 return null;
             }
-            catch (Exception ex) { Console.Error.WriteLine($"ERROR: Exception during UDP parsing: {ex}"); return null; }
+            catch (Exception ex) { //Console.Error.WriteLine($"ERROR: Exception during UDP parsing: {ex}"); return null; }
+            }
         }
+        return null;
     }
 
     // Helper method to read null-terminated string

@@ -60,6 +60,18 @@ namespace Ipk25Chat {
             _port = port;
         }
 
+        // this function was genereated by github copilot
+        protected void PrintHelp()
+        {
+            Console.WriteLine("Available commands:");
+            Console.WriteLine("/auth <username> - Authenticate with the server using the specified username.");
+            Console.WriteLine("/join <room> - Join a chat room.");
+            Console.WriteLine("/msg <message> - Send a message to the current chat room.");
+            Console.WriteLine("/bye - Disconnect from the server.");
+            Console.WriteLine("/help - Display this help message.");
+            Console.WriteLine("/rename <new_display_name> - Change your display name.");
+        }
+
     }
 
 

@@ -74,6 +74,18 @@ public class UdpChatClient : ChatClient
         }
     }
 
+    private int GetPrevMessageId()
+    {
+        lock (_messageIdLock)
+        {
+            if (_nextMessageId > 0)
+            {
+                _nextMessageId--;
+            }
+            return _nextMessageId;
+        }
+    }
+
    
     private void InitializeSocket()
     {
@@ -204,19 +216,20 @@ public class UdpChatClient : ChatClient
             }
             catch(ArgumentException ex) {
                 if(ex.Message == "rename") {
+                    GetPrevMessageId();
                     continue;
                 }
                 if(ex.Message == "help") {
 
                 }
                 else {
-                    Console.WriteLine("ERROR: " + ex.Message);
+                    Console.WriteLine("ERROR: " + ex.ToString());
                 }
 
-                Console.WriteLine("ERROR: " + ex.Message);
+                Console.WriteLine("ERROR: " + ex.ToString());
             }
             catch(Exception ex) {
-                Console.WriteLine("ERROR: " + ex.Message);
+                Console.WriteLine("ERROR: " + ex.ToString());
             }
             
         }
@@ -258,7 +271,10 @@ public class UdpChatClient : ChatClient
             targetEndPoint: iPEndpoint
         );
         _pendingConfirmationMessages[message.MessageId] = sentMessageInfo;
-        
+        foreach(var key in _pendingConfirmationMessages.Keys)
+        {
+            Console.Error.WriteLine("Pending confirmation message ID: " + key);
+        }
         // Start a timer to handle retransmissions if confirmation is not received
         StartRetryLoop(message.MessageId, sentMessageInfo);
     }
@@ -280,7 +296,7 @@ public class UdpChatClient : ChatClient
                 }
 
                 // Retry sending the message
-                //Console.Error.WriteLine($"DEBUG: Retrying message ID {messageId}, attempt {sentMessageInfo.RetryCount + 1}");
+                Console.Error.WriteLine($"DEBUG: Retrying message ID {messageId}, attempt {sentMessageInfo.RetryCount + 1}");
                 try
                 {
                     _socket?.SendTo(sentMessageInfo.Payload, SocketFlags.None, sentMessageInfo.TargetEndPoint);
@@ -303,7 +319,7 @@ public class UdpChatClient : ChatClient
         });
     }
      
-    private bool SendUdpPayloadToServer(byte[] payload)
+    private bool SendUdpPayloadToServer(byte[] payload, bool isConfirmation = false)
     {
         if (_socket == null)
         {
@@ -324,11 +340,17 @@ public class UdpChatClient : ChatClient
             int bytesSent = 0;
             if(_isAuthenticated) {
                 bytesSent = _socket.SendTo(payload, SocketFlags.None, _dynamicServerEndPoint);
-                //Console.Error.WriteLine("Debug: payload sent to dynamic server endpoint");
+                if(isConfirmation) {
+                    Console.Error.WriteLine($"Confirmation with ID {payloadMessageId} sent to dynamic server endpoint");
+                }
+                else {
+                    Console.Error.WriteLine($"Debug: payload with ID {payloadMessageId} sent to dynamic server endpoint");
+                }
+                
             }
             else {
                 bytesSent = _socket.SendTo(payload, SocketFlags.None, _initialServerEndPoint);
-                //Console.Error.WriteLine("Debug: payload sent to initial server endpoint");
+                Console.Error.WriteLine($"Debug: payload with ID {payloadMessageId} sent to initial server endpoint");
                 //Console.Error.WriteLine(_initialServerEndPoint.ToString());
             }
                 
@@ -382,12 +404,47 @@ public class UdpChatClient : ChatClient
                     SocketReceiveFromResult result = await _socket.ReceiveFromAsync(bufferSegment, SocketFlags.None, senderEndPoint, token);
 
                     var receivedBytes = bufferSegment.Slice(0, result.ReceivedBytes);
+
+
+                    byte firstByte = receivedBytes[0];
+                    ushort messageId = (ushort)IPAddress.NetworkToHostOrder(BitConverter.ToInt16(receivedBytes.Slice(1, 2).ToArray(), 0));
+                    
+                    if(firstByte != 0) {
+                        ConfirmMessage confirmation = new ConfirmMessage(messageId);
+                        SendUdpPayloadToServer(confirmation.GetBytesForUdpPacket(), true);
+                        //Console.Error.WriteLine("Debug: sent confirm for message with id: " + messageId);
+                    }
+
+                    if(firstByte != 1) {
+                        if (alreadyConfirmedIds.Contains(messageId))
+                        {
+                            Console.Error.WriteLine($"DEBUG: Ignoring incoming message with ID {messageId} as it has already been confirmed.");
+                            continue;
+                        }
+                        else
+                        {
+                            alreadyConfirmedIds.Add(messageId);
+                        }
+                    }
+
+                    
+                    
+                    
+                    
+                    
+
                     var senderRemoteEndPoint = (IPEndPoint)result.RemoteEndPoint;
 
-                
-                    Message parsedMessage = UdpMessageParser.ParseUdp(receivedBytes.ToArray());
+                                    
+                    Message parsedMessage = UdpMessageParser.ParseUdp(receivedBytes.ToArray(), this);
+                    
+                    // malformed message
+                    if(parsedMessage == null) {
+                        
+                    }
 
                     if(parsedMessage is ReplyAuthMessage) {
+                        //Console.Error.WriteLine("Debug: dostal som reply auth message");
                         ReplyAuthMessage replyMessage = (ReplyAuthMessage)parsedMessage;
                         if(replyMessage.IsSuccess) {
                             
@@ -396,11 +453,32 @@ public class UdpChatClient : ChatClient
                             
                             ////Console.Error.WriteLine("DEBUG: Received REPLY from server. Authentication successful.");
                         }
-                        _isAuthenticated = true;
-                        _dynamicServerEndPoint = senderRemoteEndPoint;
+                        if(!_isAuthenticated) {
+                            _isAuthenticated = true;
+                            _dynamicServerEndPoint = senderRemoteEndPoint;
+                        }
+                        Console.Error.WriteLine("Debug: reply with ref id was received: " + parsedMessage.MessageId);
+                        // here delete if reply message was received
+                        if(_pendingConfirmationMessages.ContainsKey(parsedMessage.MessageId)) {
+                            //Console.Error.WriteLine("Debug: dostal som reply auth message s id: " + replyMessage.RefMessageId);
+                            _pendingConfirmationMessages.Remove(parsedMessage.MessageId);
+                        }
+                        /*
 
                         ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
-                        SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
+                        byte[] payload = confirmMessage.GetBytesForUdpPacket();
+                        Console.Error.WriteLine("confirm payload");
+                        foreach(byte item in payload) {
+                            Console.Error.WriteLine(item);
+                        }
+                        
+                        if(SendUdpPayloadToServer(payload)) {
+                            Console.Error.WriteLine("Debug: payload sent to server successfully");
+                        }
+                        else {
+                            Console.Error.WriteLine("Debug: payload not sent to server");
+                        }
+                        */
                         
                         
                     }
@@ -408,8 +486,8 @@ public class UdpChatClient : ChatClient
                     // todo ostatne spravy
                     if(parsedMessage is PingMessage) {
                         //Console.Error.WriteLine("Debug: dostal som ping");
-                        ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
-                        SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
+                        //ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
+                        //SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
                     }
 
                     if(parsedMessage is ConfirmMessage) {
@@ -427,22 +505,22 @@ public class UdpChatClient : ChatClient
                     }
 
                     if(parsedMessage is ByeMessage) {
-                        ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
-                        SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
+                        //ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
+                        //SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
                         DisconnectAsync("Bye message received");
                         Environment.Exit(0);
                     }
 
                     if(parsedMessage is MsgMessage) {
-                        ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
-                        SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
+                        //ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
+                        //SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
                         MsgMessage msgMessage = (MsgMessage)parsedMessage;
                        Console.WriteLine(msgMessage.ToString());
                     }
 
                     if(parsedMessage is ErrMessage) {
-                        ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
-                        SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
+                        //ConfirmMessage confirmMessage = new ConfirmMessage(parsedMessage.MessageId);
+                        //SendUdpPayloadToServer(confirmMessage.GetBytesForUdpPacket());
                         ErrMessage errMessage = (ErrMessage)parsedMessage;
                         Console.WriteLine(errMessage.ToString());
                     }
@@ -461,11 +539,32 @@ public class UdpChatClient : ChatClient
                     }
                     */
                 }
+
+                //catch (NotSupportedException ex)
+                //{
+                    //Console.WriteLine($"ERROR: Malformed message type");
+                //}
+
                 catch (OperationCanceledException)
                 {
                     Console.WriteLine("DEBUG: Receive loop canceled.");
                     break;
                 }
+                
+                catch(ArgumentException ex) {
+                    if(ex.Message == "malformed message") {
+                        Console.Error.WriteLine("Debug: malformed message");
+                        Console.WriteLine("ERROR: Malformed message received.");
+                        ErrMessage errMessage = new ErrMessage(DisplayName, "Malformed message received", GetNextMessageId());
+                        byte[] errPayload = errMessage.GetBytesForUdpPacket();
+                        SendUdpPayloadToServer(errPayload);
+                        DisconnectAsync("Malformed message received");
+                        Environment.Exit(1);
+                        continue;
+                    }
+                }
+                
+                
                 catch (SocketException ex)
                 {
                     OutputError($"Socket error in receive loop: {ex.Message} (Code: {ex.SocketErrorCode})");
@@ -474,6 +573,7 @@ public class UdpChatClient : ChatClient
                         break;
                     }
                 }
+                
                 catch (ObjectDisposedException)
                 {
                     Console.WriteLine("DEBUG: Socket disposed during receive.");
@@ -481,7 +581,7 @@ public class UdpChatClient : ChatClient
                 }
                 catch (Exception ex)
                 {
-                    OutputError($"Unexpected error in receive loop: {ex.Message}");
+                    OutputError($"Unexpected error in receive loop: {ex.ToString()}");
                 }
             }
         }
@@ -502,7 +602,9 @@ public class UdpChatClient : ChatClient
             case AuthMessage authMessage when CurrentState == ClientState.Auth || CurrentState == ClientState.Start:
                 byte [] payload = authMessage.GetBytesForUdpPacket();
 
-                
+                //Console.Error.WriteLine("Debug: sent auth messsage with id: " + authMessage.MessageId);
+
+
                 if(!SendUdpPayloadToServer(payload)) {
                     //Console.Error.WriteLine("Debug: payload not sent to server");
                     break;
@@ -528,11 +630,17 @@ public class UdpChatClient : ChatClient
                 //Console.Error.WriteLine("Debug: msg payload");
                 
                 SendUdpPayloadToServer(msgPayload);
+                Console.Error.WriteLine("debug: poslal som typ msg");
                 WaitConfirm(msgMessage, msgPayload);
                 break;
 
             case JoinMessage joinMessage when CurrentState == ClientState.Open:
                 byte[] joinPayload = joinMessage.GetBytesForUdpPacket();
+                Console.Error.WriteLine("join bytes");
+                foreach(byte item in joinPayload) {
+                    Console.Error.WriteLine(item);
+                }
+
                 SendUdpPayloadToServer(joinPayload);
                 WaitConfirm(joinMessage, joinPayload);
                 break;

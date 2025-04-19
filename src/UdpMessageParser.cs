@@ -5,7 +5,7 @@ namespace Ipk25Chat {
 public class UdpMessageParser
 {
     
-    public static Message ParseUdp(byte[] data)
+    public static Message ParseUdp(byte[] data, UdpChatClient udpChatClient)
     {
         if (data == null || data.Length < 3) return null; // Need at least Type + ID
 
@@ -20,13 +20,19 @@ public class UdpMessageParser
 
                 short networkMessageId = reader.ReadInt16(); // Reads 2 bytes
                 ushort messageId = (ushort)IPAddress.NetworkToHostOrder(networkMessageId);
+                //Console.Error.WriteLine("doslo mi message s id: " + messageId);
+
+                // send back confirm message imidiatly
+                //ConfirmMessage confrimation = new ConfirmMessage(messageId);
+
+                //udpChatClient.SendUdpPayloadToServer(confrimation.GetBytesForUdpPacket());
 
                 Message? parsedMsg = null;
                 switch (messageType)
                 {
                      // Only parse messages expected from server typically
                      case MessageType.REPLY:
-                        
+                        //Console.Error.WriteLine("Here");
                         byte result = reader.ReadByte();
                         short networkRefId = reader.ReadInt16();
 
@@ -35,7 +41,9 @@ public class UdpMessageParser
                         ReplyAuthMessage replyAuthMsg = new ReplyAuthMessage
                         (
                             isSuccess: result == 1,
-                            messageContent: content
+                            messageContent: content,
+                            messageId: refMsgId
+                            //messageId: messageId
                         );
                         Console.WriteLine(replyAuthMsg.ToString());
                         return replyAuthMsg;
@@ -68,16 +76,29 @@ public class UdpMessageParser
                             ConfirmMessage confirmMessage = null;
 
 
-                            //Console.Error.WriteLine("Debug: message with ID " + messageId + " was confirmed.");
+                            
                             if (UdpChatClient._pendingConfirmationMessages.ContainsKey(messageId))
                             {
                                 UdpSentMessageInfo udpSentMessageInfo = UdpChatClient._pendingConfirmationMessages[messageId];
+
+                                
+                                
                                 // bye message was confirmed
                                 if(udpSentMessageInfo.Payload[0] == 0xFF) {
                                     confirmMessage = new ConfirmMessage(messageId, MessageType.BYE);
                                 }
-                                UdpChatClient._pendingConfirmationMessages.Remove(messageId);
-                                UdpChatClient.alreadyConfirmedIds.Add(messageId);
+                                // if reaply message was confirm - do not remove if from pending list
+                                if(udpSentMessageInfo.Payload[0] != 0x01) {
+                                    Console.Error.WriteLine("Debug: message with ID " + messageId + " was confirmed.");
+                                    UdpChatClient._pendingConfirmationMessages.Remove(messageId);
+                                    foreach (var key in UdpChatClient._pendingConfirmationMessages.Keys)
+                                    {
+                                        Console.Error.WriteLine("Pending confirmation message ID: " + key);
+                                    }
+
+                                    //UdpChatClient.alreadyConfirmedIds.Add(messageId);
+                                }
+                                
                             }
                            //parsedMsg = new ConfirmMessage { RefMessageId = confirmRefId };
                            return confirmMessage;
@@ -87,8 +108,10 @@ public class UdpMessageParser
                             return pingMessage;
                            
                      default:
-                           //Console.Error.WriteLine($"WARN: UDP Parser received unknown message type byte: {messageTypeByte}");
-                           break; // Parsed message remains null
+                        //throw new NotSupportedException($"Malfomred message with id: {messageId}");
+                        Console.WriteLine($"ERROR: Malformed message with id: {messageId}");
+                        return null;
+                         // Parsed message remains null
                 }
                 return null;
             }

@@ -27,7 +27,7 @@ public class UdpMessageFormatter
         // Trim whitespace
         string trimmedInput = userInput.Trim();
 
-        //Console.Error.WriteLine($"Debug: User input: {trimmedInput}");
+        ////Console.Error.WriteLine($"Debug: User input: {trimmedInput}");
 
         if (trimmedInput.StartsWith("/rename ", StringComparison.OrdinalIgnoreCase))
         {
@@ -35,12 +35,12 @@ public class UdpMessageFormatter
 
             if (string.IsNullOrWhiteSpace(newDisplayName))
             {
-                Console.Error.WriteLine("Error: Display name cannot be empty.");
+                //Console.Error.WriteLine("Error: Display name cannot be empty.");
                 return null;
             }
 
             udpChatClient.DisplayName = newDisplayName;
-            Console.Error.WriteLine($"Debug: Display name changed to {udpChatClient.DisplayName}");
+            //Console.Error.WriteLine($"Debug: Display name changed to {udpChatClient.DisplayName}");
             throw new ArgumentException("rename");
         }
 
@@ -69,9 +69,26 @@ public class UdpMessageFormatter
                 messageId: nextMessageId
             );
         }
+
+        if (trimmedInput.StartsWith("/join ", StringComparison.OrdinalIgnoreCase) && udpChatClient.CurrentState == ClientState.Open)
+        {
+            
+            string argsString = trimmedInput.Substring("/join ".Length);
+
+            string[] parsedArgs = JoinMessage.ParseJoinMessageArgs(argsString);
+            return new JoinMessage
+            (
+                channelId: parsedArgs[0],
+                displayName: udpChatClient.DisplayName,
+                messageId: nextMessageId
+            );
+            
+            
+        }
+
         if (udpChatClient.CurrentState == ClientState.Open && trimmedInput != "/quit") 
         {
-            Console.Error.WriteLine("Debug: Msg message object created");
+            //Console.Error.WriteLine("Debug: Msg message object created");
             
             return new MsgMessage
             (
@@ -82,33 +99,11 @@ public class UdpMessageFormatter
             
         }
         
-        if (udpChatClient.CurrentState == ClientState.Open && trimmedInput != "/quit")
-        {
-            Console.Error.WriteLine("Debug: Msg message object created");
-            
-            return new MsgMessage
-            (
-                displayName: udpChatClient.DisplayName, 
-                messageContent: trimmedInput
-            );
-            
-        }
-        if (trimmedInput.StartsWith("/join ", StringComparison.OrdinalIgnoreCase))
-        {
-            /*
-            string argsString = trimmedInput.Substring("/join ".Length);
+        
 
-            // Parse arguments specifically for Join
-            //TODO
-            //string[] parsedArgs = JoinMessage.ParseJoinMessageArgs(argsString, udpChatClient);
-            return new JoinMessage
-            (
-                channelId: parsedArgs[0],
-                displayName: udpChatClient.DisplayName
-            );
-            */
-            
-        }
+
+        
+        
         if(trimmedInput == "/quit")
         {
             udpChatClient.CurrentState = ClientState.End;

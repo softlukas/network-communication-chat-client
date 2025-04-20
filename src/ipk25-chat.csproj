@@ -8,6 +8,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>ipk25chat-client</AssemblyName>
     <PublishSingleFile>true</PublishSingleFile>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
   <ItemGroup>

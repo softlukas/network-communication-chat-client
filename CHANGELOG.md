@@ -1,0 +1,1 @@
+Pri spúšťaní študentských testov som mal problém, že niekedy nestíhali zachytiť prichádzajúcu správu, alebo vypísanie na stdout. Čiastočným riešením bolo pridať na kľúčové miesta funkciu sleep, no potom najmä posielatnie CONFIRM správy ihneď po prijatí akejkoľvek správy. V mojom prípade však testy nedávali konštatné výsledky pri spustení niekoľko krát po sebe ani tak.

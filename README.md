@@ -165,7 +165,7 @@ WOTkar01: jsem neco testoval
 
 ## Zdroje
 
-[1] Rozdíly mezi TCP a UDP Dostupné na [https://www.guru99.com/cs/differences-between-tcp-and-udp.html]
+[1] Rozdíly mezi TCP a UDP Dostupné na: [https://www.guru99.com/cs/differences-between-tcp-and-udp.html]
 
 [2] MALASHCHUK Vladyslav, Tomáš HOBZA, et al. VUT_IPK_CLIENT_TESTS [online]. GitHub, 2025 [cit. 2025-04-16]. Dostupné na: [https://github.com/Vlad6422/VUT_IPK_CLIENT_TESTS](https://github.com/Vlad6422/VUT_IPK_CLIENT_TESTS)
 

@@ -8,8 +8,9 @@ public static class TcpMessageParser
         {    
             if (string.IsNullOrWhiteSpace(rawData))
                 return null;
+            Console.Error.WriteLine($"Debug: rawData: {rawData}");
             // check reply on auth message
-            if (rawData.StartsWith("REPLY OK IS ")) 
+            if (rawData.StartsWith("REPLY OK IS ", StringComparison.OrdinalIgnoreCase)) 
             {
                 ReplyAuthMessage replyAuthMessage = new ReplyAuthMessage
                 (
@@ -29,7 +30,7 @@ public static class TcpMessageParser
                 
                 return replyAuthMessage;
             }
-            if (rawData.StartsWith("REPLY NOK IS ")) {
+            if (rawData.StartsWith("REPLY NOK IS ", StringComparison.OrdinalIgnoreCase)) {
                 ReplyAuthMessage replyAuthMessage = new ReplyAuthMessage
                 (
                     isSuccess: false,
@@ -44,12 +45,12 @@ public static class TcpMessageParser
                 return replyAuthMessage;
             }
         
-            if (rawData.StartsWith("MSG FROM "))
+            if (rawData.StartsWith("MSG FROM ", StringComparison.OrdinalIgnoreCase))
             {
                 string prefix = "MSG FROM ";
                 string infix = " IS ";
-                // Find the position of " IS " after "MSG FROM "
-                int isIndex = rawData.IndexOf(infix, prefix.Length);
+                // Find the position of " IS " after "MSG FROM " (case-insensitive)
+                int isIndex = rawData.IndexOf(infix, prefix.Length, StringComparison.OrdinalIgnoreCase);
 
                 if (isIndex > prefix.Length) // Check if " IS " was found and is after DisplayName
                 {
@@ -75,7 +76,7 @@ public static class TcpMessageParser
                 }
             }
 
-            if(rawData.StartsWith("BYE FROM "))
+            if(rawData.StartsWith("BYE FROM ", StringComparison.OrdinalIgnoreCase))
             {
                 ByeMessage byeMessage = new ByeMessage
                 (
@@ -90,7 +91,7 @@ public static class TcpMessageParser
                 return byeMessage;
             }
 
-            if(rawData.StartsWith("ERR FROM "))
+            if(rawData.StartsWith("ERR FROM ", StringComparison.OrdinalIgnoreCase))
             {
                 string prefix = "ERR FROM ";
                 string infix = " IS ";

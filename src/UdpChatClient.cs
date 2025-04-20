@@ -420,7 +420,7 @@ namespace Ipk25Chat
             }
             finally
             {
-                Console.WriteLine("DEBUG: Receive loop terminated.");
+                Console.Error.WriteLine("DEBUG: Receive loop terminated.");
                 if (_currentState != ClientState.End)
                 {
                     await DisconnectAsync("Receive loop terminated unexpectedly.");

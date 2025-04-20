@@ -140,6 +140,12 @@ namespace Ipk25Chat
                     short networkMessageId = reader.ReadInt16(); // Reads 2 bytes
                     ushort messageId = (ushort)IPAddress.NetworkToHostOrder(networkMessageId);
                     Console.Error.WriteLine("Debug: Received message type: " + messageType);
+
+                    if(messageType != MessageType.CONFIRM) {
+                        Console.Error.WriteLine($"message with ID {messageId} and type {messageType} added to already proccessed list");
+                        UdpChatClient.alreadyConfirmedIds.Add(messageId);
+                    }
+
                     // switch based on the message type
                     switch (messageType)
                     {
@@ -198,10 +204,7 @@ namespace Ipk25Chat
                                     {
                                         Console.Error.WriteLine("Pending confirmation message ID: " + key);
                                     }
-                                    if(messageType != MessageType.CONFIRM) {
-                                        Console.Error.WriteLine($"message with ID {messageId} and type {messageType} added to already proccessed list");
-                                        UdpChatClient.alreadyConfirmedIds.Add(messageId);
-                                    }
+                                    
                                     
                                 }
                                 confirmMessage = new ConfirmMessage(messageId);

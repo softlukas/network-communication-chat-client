@@ -22,14 +22,14 @@ Cieľom bolo vytvoriť chatovacieho klienta, ktorý bude môcť komunikovať so 
 
 #### TCP vs UDP
 
-TCP je protokol orientovaný na pripojenie, zatiaľ čo UDP je protokol bez pripojenia.[zdroj]
+TCP je protokol orientovaný na pripojenie, zatiaľ čo UDP je protokol bez pripojenia.[1]
 V TCP variante sa môj klient najskôr pripája na server pomocou TcpClient za použitia 3-way handshake, zatiaľ čo v UDP je prvá interakcia so serverom až `AUTH` správa.
 
-TCP má potvrdzovacie segmenty, ale UDP nemá žiadne potvrdzovacie segmenty.[zdroj]
+TCP má potvrdzovacie segmenty, ale UDP nemá žiadne potvrdzovacie segmenty.[1]
 V praxi to znamená že v UDP variante sme museli implementovať napr. potvrdzovanie správ či evidovanie už spracovaných správ.
 
 #### Použitie asynchrónnych funkcii
-Pre správne fungovanie aplikácie bolo potrebné niektoré funkcie implementovať ako asynchrónne, čo v praxi znamená, že aplikácia dokáže zachytiť prichádzajúcu správu na inom vlákne, napr. počas zadávania vstupu od užívateľa.
+Pre správne fungovanie aplikácie bolo potrebné niektoré funkcie implementovať ako asynchrónne, čo v praxi znamená, že aplikácia dokáže zachytiť prichádzajúcu správu na inom vlákne, napr. počas zadávania vstupu od užívateľa. [3]
 
 
 
@@ -168,6 +168,8 @@ WOTkar01: jsem neco testoval
 [1] Rozdíly mezi TCP a UDP Dostupné na: [https://www.guru99.com/cs/differences-between-tcp-and-udp.html](https://www.guru99.com/cs/differences-between-tcp-and-udp.html)
 
 [2] MALASHCHUK Vladyslav, Tomáš HOBZA, et al. VUT_IPK_CLIENT_TESTS [online]. GitHub, 2025 [cit. 2025-04-16]. Dostupné na: [https://github.com/Vlad6422/VUT_IPK_CLIENT_TESTS](https://github.com/Vlad6422/VUT_IPK_CLIENT_TESTS)
+
+[3] Asynchronous programming with async and await Dostupné na: [https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/)
 
 [RFC2119] Bradner, S. _Key words for use in RFCs to Indicate Requirement Levels_ [online]. March 1997. [cited 2024-02-11]. DOI: 10.17487/RFC2119. Available at: [https://datatracker.ietf.org/doc/html/rfc2119](https://datatracker.ietf.org/doc/html/rfc2119)
 

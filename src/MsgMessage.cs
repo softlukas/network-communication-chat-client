@@ -95,7 +95,7 @@ namespace Ipk25Chat
 
         public override string ToString()
         {
-            return $"{DisplayName}: {MessageContent}\n";
+            return $"{DisplayName}: {MessageContent}";
         }
     }
 }

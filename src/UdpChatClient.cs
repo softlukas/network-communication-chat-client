@@ -331,6 +331,7 @@ namespace Ipk25Chat
                             }
                             
                         }
+
                         // get sender endpoint
                         var senderRemoteEndPoint = (IPEndPoint)result.RemoteEndPoint;
                         // parse message

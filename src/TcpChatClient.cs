@@ -88,7 +88,7 @@ namespace Ipk25Chat
             Console.Error.WriteLine("Debug: Connected successfully");
             
 
-            var message = await Message.CreateMessageFromUserInputAsync(this);
+            var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
             if (message == null)
             {
                 Console.WriteLine("ERROR: Undefined command");
@@ -100,7 +100,7 @@ namespace Ipk25Chat
 
         private async Task HandleAuthStateAsync()
         {
-            var message = await Message.CreateMessageFromUserInputAsync(this);
+            var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
             if (message == null)
             {
                 Console.WriteLine("ERROR: Undefined command");
@@ -113,7 +113,7 @@ namespace Ipk25Chat
         private async Task HandleOpenStateAsync()
         {
             try {
-                var message = await Message.CreateMessageFromUserInputAsync(this);
+                var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
 
                 if (message == null)
                 {
@@ -139,7 +139,7 @@ namespace Ipk25Chat
 
         private async Task HandleJoinStateAsync()
         {
-            var message = await Message.CreateMessageFromUserInputAsync(this);
+            var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
             if (message == null)
             {
                 Console.WriteLine("ERROR: Undefined command");

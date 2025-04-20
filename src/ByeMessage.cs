@@ -8,7 +8,7 @@ namespace Ipk25Chat
         public override MessageType Type => MessageType.BYE;
 
         // The display name of the party initiating the disconnection.
-        // Constraint: Max 20 chars, Printable characters (0x21-7E).
+    
         public string DisplayName { get; private set; }
 
         public ByeMessage(string displayName)

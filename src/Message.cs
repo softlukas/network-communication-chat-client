@@ -64,12 +64,7 @@ namespace Ipk25Chat
                 throw new ArgumentNullException("User input is null");
             }
 
-            // Check for EOF (Ctrl+D in Linux)
-            ///if (userInput.Contains(EOF)) // ASCII code 4 represents EOF
-            //{
-                //Console.Error.WriteLine("EOF detected in user input.");
-                //return null;
-            //}
+            
 
             // Handle empty or EOF input
             if (string.IsNullOrWhiteSpace(userInput))

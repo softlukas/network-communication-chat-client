@@ -2,6 +2,123 @@ namespace Ipk25Chat {
 
 public static class TcpMessageParser
 {
+
+    public static async Task<Message?> CreateMessageFromUserInputAsync(TcpChatClient tcpChatClient)
+    {
+        // Read line async (non-blocking)
+        string? userInput = await Task.Run(() => Console.ReadLine());
+
+        if(userInput == null)
+        {
+            throw new ArgumentNullException("User input is null");
+        }
+
+        
+
+        // Handle empty or EOF input
+        if (string.IsNullOrWhiteSpace(userInput))
+        {
+            return null;
+        }
+
+        // Trim whitespace
+        string trimmedInput = userInput.Trim();
+
+        //Console.Error.WriteLine($"Debug: User input: {trimmedInput}");
+
+        // Check for /auth command
+        if (trimmedInput.StartsWith("/auth ", StringComparison.OrdinalIgnoreCase))
+        {
+            // Extract arguments string
+            string argsString = trimmedInput.Substring("/auth ".Length);
+
+            // Call static parser on AuthMessage class
+            string[] parsedArgs = AuthMessage.ParseAuthMessageArgs(argsString);
+            tcpChatClient.DisplayName = parsedArgs[2];
+            AuthMessage? authMessage = null;
+            try {
+                authMessage =  new AuthMessage
+                (
+                username: parsedArgs[0],
+                secret: parsedArgs[1],
+                displayName: parsedArgs[2]
+                );
+
+                if(tcpChatClient.CurrentState != ClientState.Join && tcpChatClient.CurrentState != ClientState.Open)
+                {
+                    tcpChatClient.CurrentState = ClientState.Auth;
+                }
+                
+                
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
+            
+            return authMessage;
+        }
+
+        if (trimmedInput.StartsWith("/rename ", StringComparison.OrdinalIgnoreCase))
+        {
+            string newDisplayName = trimmedInput.Substring("/rename ".Length);
+
+            if (string.IsNullOrWhiteSpace(newDisplayName))
+            {
+                Console.Error.WriteLine("Error: Display name cannot be empty.");
+                return null;
+            }
+
+            tcpChatClient.DisplayName = newDisplayName;
+            throw new ArgumentException("rename");
+        }
+        
+        if (tcpChatClient.CurrentState == ClientState.Open && trimmedInput != "/quit" && !trimmedInput.Contains("/join"))
+        {
+            
+            Console.Error.WriteLine("Debug: Msg message object created");
+            
+            return new MsgMessage
+            (
+                displayName: tcpChatClient.DisplayName, 
+                messageContent: trimmedInput
+            );
+            
+        }
+        if (trimmedInput.StartsWith("/join ", StringComparison.OrdinalIgnoreCase))
+        {
+            
+            string argsString = trimmedInput.Substring("/join ".Length);
+
+            // Parse arguments specifically for Join
+            string[] parsedArgs = JoinMessage.ParseJoinMessageArgs(argsString);
+            
+            return new JoinMessage
+            (
+                channelId: parsedArgs[0],
+                displayName: tcpChatClient.DisplayName
+            );
+            
+        }
+
+        
+
+        if(trimmedInput == "/quit")
+        {
+            tcpChatClient.CurrentState = ClientState.End;
+            return new ByeMessage(
+                displayName: tcpChatClient.DisplayName
+            );
+        }
+
+        if(trimmedInput == "/help")
+        {
+            Console.WriteLine("Available commands: /auth, /rename, /join, /quit");
+        }
+        
+        return null;
+    }
+
     public static Message WriteParsedTcpIncomingMessage(string rawData, TcpChatClient tcpChatClient)
     {
         try

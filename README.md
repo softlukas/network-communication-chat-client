@@ -9,6 +9,9 @@
 * Ilustračná fukcionalita
 * Zdroje
 
+![Alt text](img/class_diagram.png "Voliteľný titulok")
+
+
 ## Implementácia
 
 ### Zdrojové súbory
@@ -76,11 +79,73 @@ Statická trieda,
 
 ## Testovanie
 
-[source: 19] Počas vývoja som projekt testoval hlavne pomocou testovacích python serverov, ktoré som použil so súhlasom autora. [source: 20] [odkaz na zdroj]
-
-[source: 21] V konečnej fáze som použil testy vytvorené inými študentami, ako finálna kontrola mojej implementácie. Problém, ktorý sa vyskytol v tejto časti je spomenutý v súbore CHANGELOG. [Odkaz na zdroj]
+Funkčnosť implementácie som overoval pomocou komplexných testov vytvorených inými študentami, s ich súhlasom na použtie. [3] Problém pri neuspešných testoch je spomenutý v súbore CHANGELOG.
 
 ![Alt text](img/student_tests.png "Voliteľný titulok")
+
+Na záver som funkčnosť overil aj na serveri anton5.fit.vutbr.cz:
+
+```text
+(nix:nix-shell-env) ipk@ipk25:~/proj/proj2-ipk25-chat$ ./ipk25chat-client -t tcp -s anton5.fit.vutbr.cz
+Debug: Connecting to 147.229.8.244:4567 via TCP...
+Debug: Connected successfully
+/auth xsimonl00 [token] LukasSim
+Debug: Changing state to Auth
+Debug: Processing message in state Auth
+Debug: Changing state to Auth
+Debug: rawData: REPLY OK IS Authentication successful.
+
+Action Success: Authentication successful.
+
+Debug: Changing state to Open
+Debug: rawData: MSG FROM Server IS LukasSim has joined `discord.general` via TCP.
+
+Server: LukasSim has joined `discord.general` via TCP.
+hello
+Debug: Msg message object created
+Debug: Processing message in state Open
+Debug: rawData: MSG FROM sometest IS mfasf
+
+sometest: mfasf
+```
+
+Udp varianta
+
+```text
+(nix:nix-shell-env) ipk@ipk25:~/proj/proj2-ipk25-chat$ ./ipk25chat-client -t udp -s anton5.fit.vutbr.cz
+Debug: Starting UDP Client (Timeout: 250ms, Retries: 3)
+DEBUG: Socket initialized successfully.
+/auth xsimonl00 9377aa09-4169-4f77-bdf4-36254eb538f8 LukasSim
+Debug: Received message type: CONFIRM
+Debug: message with ID 0 was confirmed.
+Debug: Received message type: REPLY
+message with ID 0 and type REPLY added to already proccessed list
+Action Success: Authentication successful.
+
+Debug: Changing state to Open
+Debug: Received message type: REPLY
+message with ID 0 and type REPLY added to already proccessed list
+Action Success: Authentication successful.
+
+Debug: Changing state to Open
+Debug: Received message type: MSG
+message with ID 1 and type MSG added to already proccessed list
+Server: LukasSim has joined `discord.general` via UDP.
+Debug: Received message type: MSG
+message with ID 2 and type MSG added to already proccessed list
+WOTkar01: jsem neco testoval
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -89,3 +154,23 @@ Statická trieda,
 ## Ilustračná fukcionalita
 
 ## Zdroje
+//tu pridat zdroje
+
+
+[RFC2119] Bradner, S. _Key words for use in RFCs to Indicate Requirement Levels_ [online]. March 1997. [cited 2024-02-11]. DOI: 10.17487/RFC2119. Available at: [https://datatracker.ietf.org/doc/html/rfc2119](https://datatracker.ietf.org/doc/html/rfc2119)
+
+[RFC5234] Crocker, D. and Overell, P. _Augmented BNF for Syntax Specifications: ABNF_ [online]. January 2008. [cited 2024-02-11]. DOI: 10.17487/RFC5234. Available at: [https://datatracker.ietf.org/doc/html/rfc5234](https://datatracker.ietf.org/doc/html/rfc5234)
+
+[RFC9293] Eddy, W. _Transmission Control Protocol (TCP)_ [online]. August 2022. [cited 2024-02-11]. DOI: 10.17487/RFC9293. Available at: [https://datatracker.ietf.org/doc/html/rfc9293](https://datatracker.ietf.org/doc/html/rfc9293)
+
+[RFC894] Hornig, C. _A Standard for the Transmission of IP Datagrams over Ethernet Networks_ [online]. April 1984. [cited 2024-02-14]. DOI: 10.17487/RFC894. Available at: [https://datatracker.ietf.org/doc/html/rfc894](https://datatracker.ietf.org/doc/html/rfc894)
+
+[RFC791] Information Sciences Institute, University of Southern California. _Internet Protocol_ [online]. September 1981. [cited 2024-02-14]. DOI: 10.17487/RFC791. Available at: [https://datatracker.ietf.org/doc/html/rfc791](https://datatracker.ietf.org/doc/html/rfc791)
+
+[RFC768] Postel, J. _User Datagram Protocol_ [online]. March 1997. [cited 2024-02-11]. DOI: 10.17487/RFC0768. Available at: [https://datatracker.ietf.org/doc/html/rfc768](https://datatracker.ietf.org/doc/html/rfc768)
+
+[RFC1350] Sollins, D. _The TFTP Protocol (Revision 2)_ [online]. July 1992. [cited 2024-02-12]. DOI: 10.17487/RFC1350. Available at: [https://datatracker.ietf.org/doc/html/rfc1350](https://datatracker.ietf.org/doc/html/rfc1350)
+
+[RFC1945] NIELSEN, Henrik, Roy T FIELDING a Tim BERNERS-LEE, 2022. _Hypertext Transfer Protocol -- HTTP/1.0_ [online]. May 1996. [cited 2025-01-23]. Available at: [https://datatracker.ietf.org/doc/html/rfc1945](https://datatracker.ietf.org/doc/html/rfc1945)
+
+

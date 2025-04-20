@@ -160,8 +160,14 @@ message with ID 2 and type MSG added to already proccessed list
 WOTkar01: jsem neco testoval
 ```
 
+### Wireshark
+Zobrazenie korektného ukončenia spojenia poslaním BYE message pre TCP
 
+![](img/wireshark_tcp.png "Voliteľný titulok")
 
+Zobrazenie potvrdenia autentifikácie a potvrdzovania ping správ pri UDP
+
+![](img/wireshark_udp.png "Voliteľný titulok")
 
 ## Zdroje
 

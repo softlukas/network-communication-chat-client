@@ -198,7 +198,11 @@ namespace Ipk25Chat
                                     {
                                         Console.Error.WriteLine("Pending confirmation message ID: " + key);
                                     }
-                                    UdpChatClient.alreadyConfirmedIds.Add(messageId);
+                                    if(messageType != MessageType.CONFIRM) {
+                                        Console.Error.WriteLine($"message with ID {messageId} and type {messageType} added to already proccessed list");
+                                        UdpChatClient.alreadyConfirmedIds.Add(messageId);
+                                    }
+                                    
                                 }
                                 confirmMessage = new ConfirmMessage(messageId);
                             }

@@ -174,5 +174,30 @@ namespace Ipk25Chat
            
             return null;
         }
+
+        protected static bool IsValidUsername(string u) {
+            if(!string.IsNullOrEmpty(u))
+            {
+                return u.Length <= 21 && u.All(c => char.IsAsciiLetterOrDigit(c) || c == '_' || c == '-');
+            }
+            return false;
+        }
+
+        protected static bool IsValidSecret(string s) {
+            if(!string.IsNullOrEmpty(s))
+            {
+                return s.Length <= 128 && s.All(c => char.IsAsciiLetterOrDigit(c) || c == '_' || c == '-');
+            }
+            return false;
+        }
+
+        protected static bool IsValidDisplayName(string d) {
+            if(!string.IsNullOrEmpty(d))
+            {
+                return d.Length <= 20 && d.All(c => c >= '!' && c <= '~');
+            }
+            return false;
+        }
+
     } // End of Message class
 }

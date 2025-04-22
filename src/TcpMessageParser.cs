@@ -113,7 +113,7 @@ public static class TcpMessageParser
 
         if(trimmedInput == "/help")
         {
-            Console.WriteLine("Available commands: /auth, /rename, /join, /quit");
+            PrintHelp();
         }
         
         return null;

@@ -213,7 +213,7 @@ public static class TcpMessageParser
                 string prefix = "ERR FROM ";
                 string infix = " IS ";
                 // Find the position of " IS " after "ERR FROM "
-                int isIndex = rawData.IndexOf(infix, prefix.Length);
+                int isIndex = rawData.IndexOf(infix, prefix.Length, StringComparison.OrdinalIgnoreCase);
                 Console.Error.WriteLine($"Debug: isIndex: {isIndex}");
                 Console.Error.WriteLine("Here");
                 if (isIndex > prefix.Length) // Check if " IS " was found and is after DisplayName

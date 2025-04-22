@@ -27,8 +27,12 @@ public static class TcpMessageParser
         //Console.Error.WriteLine($"Debug: User input: {trimmedInput}");
 
         // Check for /auth command
-        if (trimmedInput.StartsWith("/auth ", StringComparison.OrdinalIgnoreCase))
-        {
+        if (trimmedInput.StartsWith("/auth ", StringComparison.OrdinalIgnoreCase)){
+            if((tcpChatClient.CurrentState != ClientState.Start && tcpChatClient.CurrentState != ClientState.Auth))
+            {
+                Console.WriteLine($"ERROR: Cannot authenticate in the {tcpChatClient.CurrentState} state.");
+                throw new InvalidOperationException($"multiple auth");
+            }
             // Extract arguments string
             string argsString = trimmedInput.Substring("/auth ".Length);
 
@@ -57,6 +61,13 @@ public static class TcpMessageParser
             }
             
             return authMessage;
+        }
+
+
+        if(trimmedInput == "/help")
+        {
+            tcpChatClient.PrintHelp();
+            throw new ArgumentException("help");
         }
 
         if (trimmedInput.StartsWith("/rename ", StringComparison.OrdinalIgnoreCase))
@@ -111,10 +122,7 @@ public static class TcpMessageParser
             );
         }
 
-        if(trimmedInput == "/help")
-        {
-            tcpChatClient.PrintHelp();
-        }
+        
         
         return null;
     }

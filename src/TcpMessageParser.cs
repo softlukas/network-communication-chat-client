@@ -113,7 +113,7 @@ public static class TcpMessageParser
 
         if(trimmedInput == "/help")
         {
-            PrintHelp();
+            tcpChatClient.PrintHelp();
         }
         
         return null;

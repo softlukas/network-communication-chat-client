@@ -61,7 +61,7 @@ namespace Ipk25Chat {
         }
 
         // this function was genereated by github copilot
-        protected void PrintHelp()
+        public void PrintHelp()
         {
             Console.WriteLine("Available commands:");
             Console.WriteLine("/auth <username> - Authenticate with the server using the specified username.");

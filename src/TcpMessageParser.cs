@@ -83,7 +83,7 @@ public static class TcpMessageParser
             tcpChatClient.DisplayName = newDisplayName;
             throw new ArgumentException("rename");
         }
-        
+        // process msg message (can be anything in open state only)
         if (tcpChatClient.CurrentState == ClientState.Open && trimmedInput != "/quit" && !trimmedInput.Contains("/join"))
         {
             
@@ -130,12 +130,13 @@ public static class TcpMessageParser
     public static Message WriteParsedTcpIncomingMessage(string rawData, TcpChatClient tcpChatClient)
     {
         try
-        {    
+        {   
+            // create messages object based on the received rawData
             if (string.IsNullOrWhiteSpace(rawData))
                 return null;
             Console.Error.WriteLine($"Debug: rawData: {rawData}");
             // check reply on auth message
-            if (rawData.StartsWith("REPLY OK IS ", StringComparison.OrdinalIgnoreCase)) 
+            if (rawData.StartsWith("REPLY OK IS ", StringComparison.OrdinalIgnoreCase)) // process all case insensitive
             {
                 ReplyAuthMessage replyAuthMessage = new ReplyAuthMessage
                 (

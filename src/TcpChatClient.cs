@@ -44,7 +44,7 @@ namespace Ipk25Chat
                 
                 try
                 {
-
+                    // get user input and create message
                     message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
 
                     if(message == null)
@@ -52,37 +52,12 @@ namespace Ipk25Chat
                         Console.WriteLine("ERROR: Undefined command. Use /help");
                         continue;
                     }
-
+                    // process message based on current state
                     await ProcessMessageAsync(message);
 
-                    /*
-                    switch (CurrentState)
-                    {
-                        case ClientState.Start:
-                            await HandleStartStateAsync();
-                            break;
-
-                        case ClientState.Auth:
-                            await HandleAuthStateAsync();
-                            break;
-
-                        case ClientState.Open:
-                            await HandleOpenStateAsync();
-                            break;
-
-                        case ClientState.Join:
-                            await HandleJoinStateAsync();
-                            break;
-
-                        case ClientState.End:
-                            Console.Error.WriteLine("Debug: End state reached");
-                            await DisconnectAsync("End state reached");
-                            Environment.Exit(0);
-                            break;
-                    }
-                    */
+                    
                 }
-
+                // ignore multiple auth
                 catch(InvalidOperationException ex){
                     if(ex.Message == "multiple auth") {
                         continue;
@@ -90,7 +65,7 @@ namespace Ipk25Chat
                     
                 }
                 
-
+                // handle bye message
                 catch(ArgumentNullException ex)
                 {
                     var byeMessage = new ByeMessage(this.DisplayName);
@@ -98,15 +73,14 @@ namespace Ipk25Chat
                     await DisconnectAsync("Bye message received.");
                     Environment.Exit(0);
                 }
-
+                // in rename and help command no message is created
                 catch(ArgumentException ex)
                 {
                     if(ex.Message == "rename" || ex.Message == "help") {
 
-                        //nsole.Error.WriteLine("Here");
                         continue;
                     }
-
+                    // handle other argument exceptions
                     else {
                         await HandleArgumentExceptionAsync(ex.Message);
                     }
@@ -126,74 +100,9 @@ namespace Ipk25Chat
             Environment.Exit(0);
         }
 
-        private async Task HandleStartStateAsync()
-        {
+       
 
-            var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
-            if (message == null)
-            {
-                Console.WriteLine("ERROR: Undefined command");
-                return;
-            }
-
-            //wait ProcessMessageAsync(message, ClientState.Auth);
-        }
-
-        private async Task HandleAuthStateAsync()
-        {
-            var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
-            if (message == null)
-            {
-                Console.WriteLine("ERROR: Undefined command");
-                return;
-            }
-
-            //await ProcessMessageAsync(message, ClientState.Auth);
-        }
-        /*
-        private async Task HandleOpenStateAsync()
-        {
-            try {
-                var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
-
-                if (message == null)
-                {
-                    Console.WriteLine("ERROR: Undefined command");
-                    return;
-                }
-
-                //await ProcessMessageAsync(message, ClientState.Open);
-
-
-            }
-            
-            
-            
-            
-        }
-        */
-
-        private async Task HandleJoinStateAsync()
-        {
-            var message = await TcpMessageParser.CreateMessageFromUserInputAsync(this);
-            if (message == null)
-            {
-                Console.WriteLine("ERROR: Undefined command");
-                return;
-            }
-
-            if (message is ByeMessage byeMessage)
-            {
-                await SendPayloadAsync(byeMessage.GetBytesInTcpGrammar());
-                CurrentState = ClientState.End;
-            }
-            else
-            {
-                Console.WriteLine("ERROR: Unsupported command in state " + CurrentState);
-            }
-
-            //await Task.Delay(100);
-        }
+        
 
         private async Task ProcessMessageAsync(Message message)
         {
@@ -229,7 +138,7 @@ namespace Ipk25Chat
                     break;
             }
 
-            //await Task.Delay(100);
+            
         }
 
         private async Task HandleArgumentExceptionAsync(string message)
@@ -383,6 +292,7 @@ namespace Ipk25Chat
 
             try
             {
+                // Loop to read incoming data
                 while (!token.IsCancellationRequested && CurrentState != ClientState.End && stream.CanRead)
                 {
                     int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token);
@@ -442,7 +352,7 @@ namespace Ipk25Chat
                 }
             }
         }
-
+        // handle sigint
         public void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
         {
             var byeMessage = new ByeMessage(this.DisplayName);

@@ -26,9 +26,9 @@
 
   
 
-V zdrojovom kóde bola umelá inteligencia využitá na refactoring kódu a pridanie komentárov.
+V zdrojovom kóde bola umelá inteligencia využitá na refactoring kódu a pridanie komentárov. Bola tiež použitá na vytvorenie testovacích python skriptov simulújich server bežiaci na localhoste.
 
-V dokumentácii bola využitá na vytvorenie Class diagramu dedičnosti na základe mojich zdrojových súborov, a taktiež na prepis mnou napísaného textu v MS Word do .md syntaxe.
+V dokumentácii bola využitá na vytvorenie diagramu tried dedičnosti na základe mojich zdrojových súborov, a taktiež na prepis mnou napísaného textu v MS Word do .md syntaxe.
 
   
 
@@ -74,13 +74,13 @@ Pre správne fungovanie aplikácie bolo potrebné niektoré funkcie implementova
 
   
 
-Základným prvkom je dedičnosť, ktorá bola použitá ako pre objekty správ, tak pre vlastnosti, ktoré majú spoločné TCP aj UDP. Na obrázku je Class Diagram zobrazujúci dedičnosť správ.
+Základným prvkom je dedičnosť, ktorá bola použitá ako pre objekty správ, tak pre vlastnosti, ktoré majú spoločné TCP aj UDP. Na prvom obrázku je diagram tried zobrazujúci zobrazujúci dedičnosť správ, na druhom dedičnosť chat klienta.
 
   
-Diagram tried zobrazujúci dedičnosť správ
+
 ![](img/class_diagram.png)
 
-Diagram tried zobrazujúci dedičnosť TCP/UDP chat klienta
+
 ![](img/chatclient.png)
 
   

@@ -78,7 +78,7 @@ Základným prvkom je dedičnosť, ktorá bola použitá ako pre objekty správ,
 
   
 
-![](img/class_diagram.png  "Voliteľný titulok")
+![](img/class_diagram.png)
 
   
   
@@ -203,7 +203,8 @@ Počas vývoja som projekt testoval pomocou lokálnych serverov vytvorených v p
 
 ### TCP localhost
 Ukážka TCP autentifikácie, príkazu /join, poslanie správy a ukončenie spojenia (SIGINT) s následným poslaním BYE mesage.
- '''text
+
+```text
 
 (nix:nix-shell-env) ipk@ipk25:~/proj/proj2-ipk25-chat/src$ dotnet run -t tcp -s localhost
 
@@ -267,13 +268,14 @@ Disconnecting... Reason: Console cancel key press.
 
 Debug: Changing state to End
 
-![](img/tcp_localhost.png  "Voliteľný titulok")
+```
+![](img/tcp_localhost.png)
 
 ### Udp localhost
 
 Ukážka UDP autentifikácie, a následná práca so správami, ako je ich potvrdzovanie či pridanie do zoznamu už spracovaných správ.
 
-'''text
+```text
 
 (nix:nix-shell-env) ipk@ipk25:~/proj/proj2-ipk25-chat/src$ dotnet run -t udp -s localhost
 
@@ -344,7 +346,7 @@ Debug: Received message type: PING
 message with ID 3 and type PING added to already proccessed list
 
 DEBUG: Incrementing message ID. to 2
-
+```
 
 ### Testovanie na serveri anton5.fit.vutbr.cz
 
@@ -400,16 +402,15 @@ sometest: mfasf
 
 ```
 
-Zobrazenie potvrdenia autentifikácie a potvrdzovania ping správ pri UDP
+
+
+
+
+![](img/wireshark_tcp.png)
 
   
 
-![](img/wireshark_udp.png  "Voliteľný titulok")
-
-
-  
-
-### UDP variant
+#### UDP variant
 
   
 
@@ -456,16 +457,22 @@ Server: LukasSim has joined `discord.general` via UDP.
 Debug: Received message type: MSG
 
 message with ID 2 and type MSG added to already proccessed list
+```
 
+
+Zobrazenie potvrdenia autentifikácie a potvrdzovania ping správ pri UDP
+
+
+![](img/wireshark_udp.png)
 
 
 Ako doplnok som celkovú funkčnosť implementácie na záver overoval pomocou komplexných testov vytvorených inými študentami, s ich súhlasom na použtie. [2] Problém pri neuspešných testoch je spomenutý v súbore CHANGELOG.
 
   
  
-![](img/student_tests.png  "Voliteľný titulok") 
+![](img/student_tests.png) 
 
-```
+
 
   
 

@@ -110,7 +110,7 @@ Toto je hlavná rodičovská trieda, z ktorej dedia všetky typy správ. Obsahuj
 
   
 
-Ďalej táto základná trieda obsahuje dva typy konštruktorov, s a bez použitia `messageId`. Každý sa používa v inom protokole.
+Ďalej táto základná trieda obsahuje dva typy konštruktorov, s použitím a bez použitia `messageId`. Každý sa používa v inom protokole.
 
   
 

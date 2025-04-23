@@ -64,10 +64,10 @@ namespace Ipk25Chat {
         public void PrintHelp()
         {
             Console.WriteLine("Available commands:");
-            Console.WriteLine("/auth <username> - Authenticate with the server using the specified username.");
-            Console.WriteLine("/join <room> - Join a chat room.");
+            Console.WriteLine("/auth <username> <secret> <display name> - Authenticate with the server using the specified username.");
+            Console.WriteLine("/join <channel> - Join a chat room.");
             Console.WriteLine("/msg <message> - Send a message to the current chat room.");
-            Console.WriteLine("/bye - Disconnect from the server.");
+            Console.WriteLine("/quit - Disconnect from the server.");
             Console.WriteLine("/help - Display this help message.");
             Console.WriteLine("/rename <new_display_name> - Change your display name.");
         }

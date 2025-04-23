@@ -78,7 +78,7 @@ Základným prvkom je dedičnosť, ktorá bola použitá ako pre objekty správ,
 
   
 
-![](img/class_diagram.svg)
+![](img/class_diagram.png)
 
   
   

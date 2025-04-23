@@ -77,8 +77,11 @@ Pre správne fungovanie aplikácie bolo potrebné niektoré funkcie implementova
 Základným prvkom je dedičnosť, ktorá bola použitá ako pre objekty správ, tak pre vlastnosti, ktoré majú spoločné TCP aj UDP. Na obrázku je Class Diagram zobrazujúci dedičnosť správ.
 
   
-
+Diagram tried zobrazujúci dedičnosť správ
 ![](img/class_diagram.png)
+
+Diagram tried zobrazujúci dedičnosť TCP/UDP chat klienta
+![](img/chatclient.png)
 
   
   

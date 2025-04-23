@@ -74,7 +74,7 @@ Pre správne fungovanie aplikácie bolo potrebné niektoré funkcie implementova
 
   
 
-Základným prvkom je dedičnosť, ktorá bola použitá ako pre objekty správ, tak pre vlastnosti, ktoré majú spoločné TCP aj UDP. Na prvom obrázku je diagram tried zobrazujúci zobrazujúci dedičnosť správ, na druhom dedičnosť chat klienta.
+Základným prvkom je dedičnosť, ktorá bola použitá ako pre objekty správ, tak pre vlastnosti, ktoré majú spoločné TCP aj UDP. Na prvom obrázku je diagram tried zobrazujúci dedičnosť správ, na druhom dedičnosť chat klienta.
 
   
 
